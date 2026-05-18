@@ -1,0 +1,18 @@
+version: "3"
+vars:
+  MVN_EXEC: "../mvnw"
+
+tasks:
+  seo:
+    desc: Run the DataForSEO news batch pipeline
+    cmd: '{{.MVN_EXEC}} spring-boot:run -Dspring-boot.run.arguments="--spring.batch.job.name=seo"'
+
+  build:
+    desc: Build the pipeline jar
+    cmd: '{{.MVN_EXEC}} package -DskipTests'
+
+  clean:
+    desc: Remove build artifacts and output files
+    cmds:
+      - '{{.MVN_EXEC}} clean'
+      - rm -f output/*.json
