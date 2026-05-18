@@ -78,17 +78,15 @@
         </span>
       </header>
 
-      <div class="body">
-        <nav class="sidebar">
-          {#each navLinks as link}
-            <a href={link.href} class:active={isActive(link.href)}>{link.label}</a>
-          {/each}
-        </nav>
+      <nav class="sidebar">
+        {#each navLinks as link}
+          <a href={link.href} class:active={isActive(link.href)}>{link.label}</a>
+        {/each}
+      </nav>
 
-        <main>
-          {@render children()}
-        </main>
-      </div>
+      <main>
+        {@render children()}
+      </main>
 
       <footer class="footer">
         <span>CRM &copy; {new Date().getFullYear()}</span>
@@ -189,16 +187,9 @@
     padding-left: calc(1.1rem - 3px);
   }
 
-  /* ── Body ─────────────────────────────────────── */
-  .body {
-    grid-area: sidebar / sidebar / main / main;
-    display: grid;
-    grid-template-columns: 260px 1fr;
-    overflow: hidden;
-  }
-
   /* ── Main content ─────────────────────────────── */
   main {
+    grid-area: main;
     background: #f1f5f9;
     overflow-y: auto;
   }
