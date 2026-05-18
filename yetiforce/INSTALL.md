@@ -161,6 +161,54 @@ systemctl reload apache2
 
 ## API access
 
-REST API at `http://your-server/webservice/`.
+**References:**
+- [API overview](https://doc.yetiforce.com/en/developer-guides/api/)
+- [Configuration](https://doc.yetiforce.com/en/developer-guides/api/config/)
+- [First connection](https://doc.yetiforce.com/en/developer-guides/api/first-connect/)
+- [Web service applications](https://doc.yetiforce.com/en/administrator-guides/integration/webservice-apps/)
+- [Webservice standard](https://doc.yetiforce.com/en/developer-guides/api/WebserviceStandard/)
 
-Generate credentials: Admin Panel → Integration → Web Service → Add application.
+## API access
+
+### 1. Enable web services
+
+Edit `/var/www/yetiforce/config/Api.php`:
+
+```php
+public static $enabledServices = ['webservice'];
+```
+
+### 2. Configure session lifetime
+
+Edit `/var/www/yetiforce/config/Security.php`:
+
+```php
+/** Maximum session lifetime from creation (minutes) */
+public static $apiLifetimeSessionCreate = 1440;
+
+/** Maximum session lifetime since last activity (minutes) */
+public static $apiLifetimeSessionUpdate = 240;
+```
+
+### 3. Create an API application
+
+Go to `http://cc.synapsedx.com/index.php?module=WebserviceApps&view=Index&parent=Settings` and add an app.
+
+Note the generated **API key**.
+
+### 4. Create a system user
+
+Go to `http://cc.synapsedx.com/index.php?module=Users&parent=Settings&view=List` and create a user dedicated to API access.
+
+### 5. Create a webservice user
+
+Go to `http://cc.synapsedx.com/index.php?module=WebserviceUsers&view=List&parent=Settings` and create a webservice user linked to the system user above.
+
+### 6. Authenticate
+
+```
+Authorization: Basic base64(appName:appPassword)
+X-API-KEY: <key from step 3>
+```
+
+REST API base URL: `http://cc.synapsedx.com/webservice/`
