@@ -7,9 +7,8 @@
   let { children }: { children: Snippet } = $props();
 
   let username = $state('');
-  let ready = $state(false);
-
-  const isLoginPage = $derived($page.url.pathname === '/login');
+  let ready    = $state(false);
+  let fetching = false;
 
   const navLinks = [
     { href: '/',          label: 'Dashboard' },
@@ -23,11 +22,17 @@
   }
 
   async function fetchUser() {
-    const res = await fetch('/api/me');
-    if (res.status === 401) { goto('/login'); return; }
-    const me: { username: string } = await res.json();
-    username = me.username;
-    ready = true;
+    if (fetching) return;
+    fetching = true;
+    try {
+      const res = await fetch('/api/me');
+      if (res.status === 401) { goto('/login'); return; }
+      const me: { username: string } = await res.json();
+      username = me.username;
+      ready = true;
+    } finally {
+      fetching = false;
+    }
   }
 
   async function logout() {
@@ -36,24 +41,33 @@
     goto('/login');
   }
 
+  // Handles direct page loads (hard refresh, first visit).
   onMount(async () => {
     if ($page.url.pathname === '/login') { ready = true; return; }
     await fetchUser();
   });
 
-  // onMount does not re-run after client-side navigation; afterNavigate
-  // catches the login → app transition and fetches the user for the first time.
-  afterNavigate(async ({ from }) => {
-    if (from?.url.pathname === '/login' && !username) {
-      await fetchUser();
-    }
+  // Handles all client-side navigations (login→app, logout→login, internal).
+  // The fetching flag prevents double-fetch when afterNavigate fires
+  // concurrently with an in-progress onMount call.
+  afterNavigate(async () => {
+    if ($page.url.pathname === '/login') { ready = true; return; }
+    if (!username) await fetchUser();
   });
 </script>
 
+<!--
+  $page.url.pathname used directly in the template — store subscriptions
+  are always reactive here. $derived wrapping a store is not reliable
+  after client-side navigation in Svelte 5 runes mode.
+-->
 {#if ready}
-  {#if isLoginPage}
+  {#if $page.url.pathname === '/login'}
+
     {@render children()}
+
   {:else}
+
     <div class="shell">
 
       <header class="topbar">
@@ -81,6 +95,7 @@
       </footer>
 
     </div>
+
   {/if}
 {/if}
 
@@ -174,9 +189,16 @@
     padding-left: calc(1.1rem - 3px);
   }
 
+  /* ── Body ─────────────────────────────────────── */
+  .body {
+    grid-area: sidebar / sidebar / main / main;
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    overflow: hidden;
+  }
+
   /* ── Main content ─────────────────────────────── */
   main {
-    grid-area: main;
     background: #f1f5f9;
     overflow-y: auto;
   }
