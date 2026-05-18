@@ -7,10 +7,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.context.SecurityContextRepository;
@@ -32,9 +32,7 @@ public class LoginController {
 
   @PostMapping("/login")
   public ResponseEntity<Map<String, String>> login(
-      @RequestBody LoginRequest req,
-      HttpServletRequest request,
-      HttpServletResponse response) {
+      @RequestBody LoginRequest req, HttpServletRequest request, HttpServletResponse response) {
     var token = UsernamePasswordAuthenticationToken.unauthenticated(req.username(), req.password());
     Authentication auth = authenticationManager.authenticate(token);
     SecurityContext context = SecurityContextHolder.createEmptyContext();
@@ -52,7 +50,8 @@ public class LoginController {
 
   @ExceptionHandler(AuthenticationException.class)
   public ResponseEntity<Map<String, String>> handleBadCredentials() {
-    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "invalid credentials"));
+    return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+        .body(Map.of("error", "invalid credentials"));
   }
 
   record LoginRequest(String username, String password) {}
