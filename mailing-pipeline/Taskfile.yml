@@ -11,6 +11,10 @@ tasks:
     desc: Build the pipeline jar
     cmd: '{{.MVN_EXEC}} package -DskipTests'
 
+  seoid:
+    desc: 'Run identify-targets job. Usage: task seoid ARTICLES_DIR=articles-1234'
+    cmd: '{{.MVN_EXEC}} spring-boot:run "-Dspring-boot.run.arguments=--spring.batch.job.name=seo-identify-target articlesDir={{.ARTICLES_DIR}}"'
+
   clean:
     desc: Remove build artifacts and output files
     cmds:

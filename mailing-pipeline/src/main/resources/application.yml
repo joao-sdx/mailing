@@ -12,3 +12,12 @@ dataforseo:
   api:
     user: ${dataforseo.api.user}
     key: ${dataforseo.api.key}
+
+seoit:
+  openai:
+    server: http://127.0.0.1:1234
+    model: nvidia/nemotron-3-nano-4b
+    key: ${openai.key}
+    connect-timeout-seconds: 10
+    request-timeout-seconds: 10
+

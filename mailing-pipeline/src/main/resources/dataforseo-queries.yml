@@ -1,13 +1,13 @@
 queries:
   - keyword: "banque transformation digitale 2026"
     language_code: fr
-    depth: 5
+    depth: 2
     location_code: 2250
     location_name: France
     file_prefix: banque-fr
   - keyword: "assurance dématérialisation conformité 2026"
     language_code: fr
-    depth: 5
+    depth: 2
     location_code: 2250
     location_name: France
     file_prefix: assurance-fr
