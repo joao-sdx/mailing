@@ -91,8 +91,8 @@
   /* ── Shell ────────────────────────────────────── */
   .shell {
     display: grid;
-    grid-template-rows: 52px 1fr 40px;
-    grid-template-columns: 220px 1fr;
+    grid-template-rows: 64px 1fr 48px;
+    grid-template-columns: 260px 1fr;
     grid-template-areas:
       "topbar  topbar"
       "sidebar main"
@@ -106,7 +106,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0 1.25rem 0 1rem;
+    padding: 0 2rem 0 1.5rem;
     background: #1e293b;
     color: #f1f5f9;
     box-shadow: 0 1px 4px #0003;
@@ -114,7 +114,7 @@
   }
 
   .brand {
-    font-size: 1rem;
+    font-size: 1.1rem;
     font-weight: 700;
     letter-spacing: 0.06em;
     color: #fff;
@@ -123,8 +123,8 @@
   .user-info {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
-    font-size: 0.85rem;
+    gap: 1rem;
+    font-size: 0.9rem;
   }
 
   .user-name { color: #94a3b8; }
@@ -132,10 +132,10 @@
   .topbar button {
     background: transparent;
     border: 1px solid #475569;
-    border-radius: 5px;
-    padding: 0.2em 0.65em;
+    border-radius: 6px;
+    padding: 0.3em 0.9em;
     color: #cbd5e1;
-    font-size: 0.8rem;
+    font-size: 0.85rem;
     cursor: pointer;
     transition: background 0.15s;
   }
@@ -147,19 +147,19 @@
     grid-area: sidebar;
     background: #f8fafc;
     border-right: 1px solid #e2e8f0;
-    padding: 1rem 0.75rem;
+    padding: 1.5rem 1rem;
     display: flex;
     flex-direction: column;
-    gap: 0.15rem;
+    gap: 0.25rem;
     overflow-y: auto;
   }
 
   .sidebar a {
     display: block;
-    padding: 0.5rem 0.85rem;
-    border-radius: 7px;
+    padding: 0.7rem 1.1rem;
+    border-radius: 8px;
     text-decoration: none;
-    font-size: 0.9rem;
+    font-size: 0.95rem;
     font-weight: 500;
     color: #475569;
     transition: background 0.12s, color 0.12s;
@@ -171,7 +171,7 @@
     background: #eff6ff;
     color: #1d4ed8;
     border-left: 3px solid #1d4ed8;
-    padding-left: calc(0.85rem - 3px);
+    padding-left: calc(1.1rem - 3px);
   }
 
   /* ── Main content ─────────────────────────────── */
@@ -186,10 +186,10 @@
     grid-area: footer;
     display: flex;
     align-items: center;
-    padding: 0 1.25rem;
+    padding: 0 1.5rem;
     background: #f8fafc;
     border-top: 1px solid #e2e8f0;
-    font-size: 0.75rem;
+    font-size: 0.8rem;
     color: #94a3b8;
   }
 </style>
