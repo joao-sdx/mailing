@@ -7,6 +7,8 @@
     <packaging>pom</packaging>
     <modules>
         <module>mailing-pipeline</module>
+        <module>crm-front</module>
+        <module>crm-back</module>
     </modules>
 
 
@@ -28,6 +30,7 @@
         <google-java-format.version>1.27.0</google-java-format.version>
 
         <spring-boot.version>3.4.5</spring-boot.version>
+        <frontend-maven-plugin.version>1.15.0</frontend-maven-plugin.version>
     </properties>
 
     <dependencyManagement>

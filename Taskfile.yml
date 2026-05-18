@@ -1,0 +1,28 @@
+version: "3"
+
+vars:
+  MVN: "./mvnw"
+  JAR: "crm-back/target/crm-back-1.0-SNAPSHOT.jar"
+
+tasks:
+  build:
+    desc: Build crm-front (Svelte) and crm-back (fat JAR)
+    cmd: "{{.MVN}} -pl crm-back -am clean package -DskipTests"
+
+  run:
+    desc: Run the crm-back fat JAR (builds first if JAR is missing)
+    cmds:
+      - task: build
+      - java -jar {{.JAR}}
+
+  front:
+    desc: Build crm-front only
+    cmd: "{{.MVN}} -pl crm-front clean package -DskipTests"
+
+  back:
+    desc: Build crm-back only (assumes crm-front JAR already installed)
+    cmd: "{{.MVN}} -pl crm-back clean package -DskipTests"
+
+  clean:
+    desc: Clean all modules
+    cmd: "{{.MVN}} clean"
