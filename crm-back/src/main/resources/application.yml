@@ -12,6 +12,5 @@ spring:
     username: ${DB_USER:crm}
     password: ${DB_PASS:crm}
     driver-class-name: org.postgresql.Driver
-  sql:
-    init:
-      mode: always
+  flyway:
+    locations: classpath:db/migration
