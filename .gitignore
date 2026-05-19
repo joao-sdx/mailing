@@ -157,6 +157,4 @@ buildNumber.properties
 # ======================================================================================================================
 .env
 output
-yetiforce/.token
-/yetiforce/source/
 .playwright-mcp/

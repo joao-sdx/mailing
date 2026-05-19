@@ -180,7 +180,64 @@ The "Create an account" link disappears immediately from the sign-in page.
 
 ---
 
-## 5. Useful commands (run as `nocobase`)
+## 5. Claude AI skills for NocoBase
+
+The NocoBase CLI installs domain-knowledge skills that let Claude operate
+your instance through natural language (data modelling, page building,
+workflow automation).
+
+**Requirements:** Node.js ≥ 22, npm.
+
+### Install the CLI (once, on your workstation)
+
+```sh
+npm install -g @nocobase/cli@beta
+nb --version          # verify
+```
+
+### Connect to this project's instance
+
+```sh
+nb init --ui
+```
+
+A browser wizard opens. Choose **Connect to an existing instance** and supply:
+
+| Field | Value |
+|---|---|
+| API address | `http://cc.synapsedx.com` |
+| Authentication | Password (root credentials) or API key |
+
+The wizard writes a per-project config file. Set `NB_CLI_ROOT` if you want
+to store it somewhere other than your home directory.
+
+#### Using password authentication (simplest)
+
+When the wizard asks for authentication choose **password** and enter the
+root account credentials. No extra setup required.
+
+#### Using an API key
+
+The API keys plugin must be enabled first — this requires the root account:
+
+1. Sign in as **root**.
+2. Navigate to `/admin/pm/list` (Plugin Manager).
+3. Find **Authentication: API keys** → **Enable**.
+4. Click the user avatar (top-right) → **API keys** → **Add API key**.
+5. Set a name and expiry, confirm. **Copy the token immediately** — it is
+   only shown once.
+6. Paste it into the `nb init --ui` wizard when prompted.
+
+> The API keys plugin is Community Edition — no licence needed, just activation.
+
+### Use in Claude Code
+
+Restart your Claude Code session after `nb init` completes.
+Claude can now manage the NocoBase instance at `cc.synapsedx.com` directly.
+
+---
+
+## 6. Useful commands (run as `nocobase`)
 
 ```sh
 # View logs
