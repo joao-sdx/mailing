@@ -21,3 +21,7 @@ seoit:
     connect-timeout-seconds: 10
     request-timeout-seconds: 10
 
+nocobase:
+  url: ${nocobase.url}
+  api-key: ${nocobase.api-key}
+

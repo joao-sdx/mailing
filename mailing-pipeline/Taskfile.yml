@@ -15,6 +15,24 @@ tasks:
     desc: 'Run identify-targets job. Usage: task seoid ARTICLES_DIR=articles-1234'
     cmd: '{{.MVN_EXEC}} spring-boot:run "-Dspring-boot.run.arguments=--spring.batch.job.name=seo-identify-target articlesDir={{.ARTICLES_DIR}}"'
 
+  nb-ping:
+    desc: Ping NocoBase API to verify connectivity
+    vars:
+      NB_URL:
+        sh: grep '^nocobase.url=' .env | cut -d= -f2-
+      NB_KEY:
+        sh: grep '^nocobase.api-key=' .env | cut -d= -f2-
+    cmd: http GET {{.NB_URL}}/api/app:getInfo "Authorization:Bearer {{.NB_KEY}}"
+
+  nb-collections:
+    desc: List all NocoBase collections
+    vars:
+      NB_URL:
+        sh: grep '^nocobase.url=' .env | cut -d= -f2-
+      NB_KEY:
+        sh: grep '^nocobase.api-key=' .env | cut -d= -f2-
+    cmd: http GET {{.NB_URL}}/api/collections "Authorization:Bearer {{.NB_KEY}}"
+
   clean:
     desc: Remove build artifacts and output files
     cmds:

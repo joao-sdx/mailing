@@ -7,4 +7,4 @@ public record NewsItem(
     String title,
     String url,
     @JsonProperty("time_published") String timePublished,
-    @JsonProperty("text_file_name") String textFileName) {}
+    String article) {}

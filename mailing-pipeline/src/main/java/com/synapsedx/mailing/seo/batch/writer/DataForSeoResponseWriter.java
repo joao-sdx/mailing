@@ -1,6 +1,7 @@
 package com.synapsedx.mailing.seo.batch.writer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.synapsedx.mailing.seo.NocobaseClient;
 import com.synapsedx.mailing.seo.batch.SeoJobContext;
 import com.synapsedx.mailing.seo.config.DataForSeoProperties;
 import com.synapsedx.mailing.seo.model.DataForSeoRequest;
@@ -9,11 +10,12 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.item.Chunk;
@@ -29,56 +31,69 @@ public class DataForSeoResponseWriter implements ItemWriter<DataForSeoRequest> {
       "https://api.dataforseo.com/v3/serp/google/news/live/advanced";
   private static final String CONTENT_ENDPOINT =
       "https://api.dataforseo.com/v3/on_page/content_parsing/live";
-  private static final Path OUTPUT_DIR = Path.of("output");
 
   private final DataForSeoProperties properties;
   private final SeoJobContext jobContext;
+  private final NocobaseClient nocobase;
   private final ObjectMapper mapper = new ObjectMapper();
   private final HttpClient httpClient = HttpClient.newHttpClient();
 
   @Override
   public void write(Chunk<? extends DataForSeoRequest> chunk) throws Exception {
-    var articlesDir = OUTPUT_DIR.resolve("seo/articles-" + jobContext.jobStartTime());
-    Files.createDirectories(OUTPUT_DIR);
-    Files.createDirectories(articlesDir);
-
     for (var request : chunk.getItems()) {
       var rawResponse = post(NEWS_ENDPOINT, request.body());
-      saveRaw(request, rawResponse);
+      var newsItems = parseItems(rawResponse);
 
-      var newsItems = parseAndFetchArticles(rawResponse, articlesDir);
-      saveRes(request, newsItems);
+      var queryId = nocobase.create("seo_query", queryFields(request));
+      log.info("seo_query_created id={} keyword={}", queryId, request.query().keyword());
+
+      for (var item : newsItems) {
+        var resultId =
+            nocobase.findByUrl("seo_result", item.url()).orElseGet(() -> createResult(item));
+        nocobase.addRelation("seo_query", queryId, "results", resultId);
+        log.info("seo_result_linked queryId={} resultId={} url={}", queryId, resultId, item.url());
+      }
     }
   }
 
-  private List<NewsItem> parseAndFetchArticles(String rawResponse, Path articlesDir)
-      throws Exception {
+  private int createResult(NewsItem item) {
+    try {
+      return nocobase.create("seo_result", resultFields(item));
+    } catch (Exception e) {
+      throw new RuntimeException("Failed to create seo_result for url=" + item.url(), e);
+    }
+  }
+
+  private List<NewsItem> parseItems(String rawResponse) throws Exception {
     var root = mapper.readTree(rawResponse);
     var items = root.path("tasks").path(0).path("result").path(0).path("items");
     var newsItems = new ArrayList<NewsItem>();
 
     for (var item : items) {
       var url = item.path("url").asText(null);
-      var domain = item.path("domain").asText(null);
-      var title = item.path("title").asText(null);
-      var timePublished = item.path("time_published").asText(null);
-
       if (url == null) {
         continue;
       }
-
-      var articleId = String.valueOf(jobContext.nextArticleId());
-      var textFilePath = articlesDir.resolve(articleId + ".md");
-      fetchAndSaveArticle(url, textFilePath);
-
-      newsItems.add(new NewsItem(domain, title, url, timePublished, textFilePath.toString()));
-      log.info("article_processed id={} url={}", articleId, url);
+      var timePublished = item.path("time_published").asText(null);
+      var article = fetchArticle(url);
+      newsItems.add(
+          new NewsItem(
+              item.path("domain").asText(null),
+              item.path("title").asText(null),
+              url,
+              timePublished,
+              article));
+      log.info(
+          "article_fetched url={} time_published=[{}] chars={}",
+          url,
+          timePublished,
+          article.length());
     }
 
     return newsItems;
   }
 
-  private void fetchAndSaveArticle(String url, Path destination) {
+  private String fetchArticle(String url) {
     try {
       var body = mapper.writeValueAsString(List.of(mapper.createObjectNode().put("url", url)));
       var response = post(CONTENT_ENDPOINT, body);
@@ -105,10 +120,34 @@ public class DataForSeoResponseWriter implements ItemWriter<DataForSeoRequest> {
           }
         }
       }
-      Files.writeString(destination, md.toString().strip());
+      return md.toString().strip();
     } catch (Exception e) {
       log.warn("content_parsing_failed url={} reason={}", url, e.getMessage());
+      return "";
     }
+  }
+
+  private Map<String, Object> queryFields(DataForSeoRequest request) {
+    var q = request.query();
+    var fields = new LinkedHashMap<String, Object>();
+    fields.put("keyword", q.keyword());
+    fields.put("language_code", q.languageCode());
+    fields.put("depth", q.depth());
+    fields.put("location_code", q.locationCode());
+    fields.put("location_name", q.locationName());
+    fields.put("file_prefix", q.filePrefix());
+    fields.put("execution_date", Instant.ofEpochSecond(jobContext.jobStartTime()).toString());
+    return fields;
+  }
+
+  private Map<String, Object> resultFields(NewsItem item) {
+    var fields = new LinkedHashMap<String, Object>();
+    fields.put("type", "news");
+    fields.put("title", item.title());
+    fields.put("domain", item.domain());
+    fields.put("url", item.url());
+    fields.put("article", item.article());
+    return fields;
   }
 
   private String post(String endpoint, String body) throws Exception {
@@ -124,21 +163,5 @@ public class DataForSeoResponseWriter implements ItemWriter<DataForSeoRequest> {
     var response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
     log.info("dataforseo_call endpoint={} status={}", endpoint, response.statusCode());
     return response.body();
-  }
-
-  private void saveRaw(DataForSeoRequest request, String body) throws Exception {
-    var filename = rawFilename(request);
-    Files.writeString(OUTPUT_DIR.resolve(filename), body);
-    log.info("dataforseo_saved file={}", filename);
-  }
-
-  private void saveRes(DataForSeoRequest request, List<NewsItem> items) throws Exception {
-    var filename = rawFilename(request).replace(".json", "-res.json");
-    Files.writeString(OUTPUT_DIR.resolve(filename), mapper.writeValueAsString(items));
-    log.info("dataforseo_res_saved file={} items={}", filename, items.size());
-  }
-
-  private String rawFilename(DataForSeoRequest request) {
-    return "seo-" + request.query().filePrefix() + "-" + jobContext.jobStartTime() + ".json";
   }
 }
