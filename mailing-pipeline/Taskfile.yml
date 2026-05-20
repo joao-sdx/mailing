@@ -15,23 +15,45 @@ tasks:
     desc: 'Run identify-targets job. Usage: task seoid ARTICLES_DIR=articles-1234'
     cmd: '{{.MVN_EXEC}} spring-boot:run "-Dspring-boot.run.arguments=--spring.batch.job.name=seo-identify-target articlesDir={{.ARTICLES_DIR}}"'
 
-  nb-ping:
-    desc: Ping NocoBase API to verify connectivity
-    vars:
-      NB_URL:
-        sh: grep '^nocobase.url=' .env | cut -d= -f2-
-      NB_KEY:
-        sh: grep '^nocobase.api-key=' .env | cut -d= -f2-
-    cmd: http GET {{.NB_URL}}/api/app:getInfo "Authorization:Bearer {{.NB_KEY}}"
+  seo-contact:
+    desc: Scan seo_result articles with LLM and upsert contacts in CRM
+    cmd: '{{.MVN_EXEC}} spring-boot:run -Dspring-boot.run.arguments="--spring.batch.job.name=seo-contact"'
 
-  nb-collections:
-    desc: List all NocoBase collections
+  sb-ping:
+    desc: Ping Supabase PostgREST to verify connectivity
     vars:
-      NB_URL:
-        sh: grep '^nocobase.url=' .env | cut -d= -f2-
-      NB_KEY:
-        sh: grep '^nocobase.api-key=' .env | cut -d= -f2-
-    cmd: http GET {{.NB_URL}}/api/collections "Authorization:Bearer {{.NB_KEY}}"
+      SB_URL:
+        sh: grep '^supabase.url=' .env | cut -d= -f2-
+      SB_ANON:
+        sh: grep '^supabase.anon-key=' .env | cut -d= -f2-
+      SB_SERVICE:
+        sh: grep '^supabase.service-role-key=' .env | cut -d= -f2-
+    cmd: 'curl -sf "{{.SB_URL}}/rest/v1/" -H "apikey: {{.SB_ANON}}" -H "Authorization: Bearer {{.SB_SERVICE}}"'
+
+  sb-pending-results:
+    desc: List seo_result records with scan_status=No (pending contact scan)
+    vars:
+      SB_URL:
+        sh: grep '^supabase.url=' .env | cut -d= -f2-
+      SB_ANON:
+        sh: grep '^supabase.anon-key=' .env | cut -d= -f2-
+      SB_SERVICE:
+        sh: grep '^supabase.service-role-key=' .env | cut -d= -f2-
+    cmd: 'curl -sf "{{.SB_URL}}/rest/v1/seo_result?scan_status=eq.No" -H "apikey: {{.SB_ANON}}" -H "Authorization: Bearer {{.SB_SERVICE}}" | python3 -m json.tool'
+
+  sb-truncate-results:
+    desc: Delete all seo_result and seo_query records from Supabase
+    vars:
+      SB_URL:
+        sh: grep '^supabase.url=' .env | cut -d= -f2-
+      SB_ANON:
+        sh: grep '^supabase.anon-key=' .env | cut -d= -f2-
+      SB_SERVICE:
+        sh: grep '^supabase.service-role-key=' .env | cut -d= -f2-
+    cmds:
+      - 'curl -sf -X DELETE "{{.SB_URL}}/rest/v1/seo_result_contacts?seo_result_id=gt.0" -H "apikey: {{.SB_ANON}}" -H "Authorization: Bearer {{.SB_SERVICE}}"'
+      - 'curl -sf -X DELETE "{{.SB_URL}}/rest/v1/seo_result?id=gt.0" -H "apikey: {{.SB_ANON}}" -H "Authorization: Bearer {{.SB_SERVICE}}"'
+      - 'curl -sf -X DELETE "{{.SB_URL}}/rest/v1/seo_query?id=gt.0" -H "apikey: {{.SB_ANON}}" -H "Authorization: Bearer {{.SB_SERVICE}}"'
 
   clean:
     desc: Remove build artifacts and output files

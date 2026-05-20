@@ -19,9 +19,10 @@ seoit:
     model: nvidia/nemotron-3-nano-4b
     key: ${openai.key}
     connect-timeout-seconds: 10
-    request-timeout-seconds: 10
+    request-timeout-seconds: 60
 
-nocobase:
-  url: ${nocobase.url}
-  api-key: ${nocobase.api-key}
+supabase:
+  url: ${supabase.url}
+  anon-key: ${supabase.anon-key}
+  service-role-key: ${supabase.service-role-key}
 

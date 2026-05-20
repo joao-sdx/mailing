@@ -1,8 +1,8 @@
 package com.synapsedx.mailing;
 
 import com.synapsedx.mailing.seo.config.DataForSeoProperties;
-import com.synapsedx.mailing.seo.config.NocobaseProperties;
 import com.synapsedx.mailing.seo.config.SeoidProperties;
+import com.synapsedx.mailing.seo.config.SupabaseProperties;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -11,7 +11,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 @EnableConfigurationProperties({
   DataForSeoProperties.class,
   SeoidProperties.class,
-  NocobaseProperties.class
+  SupabaseProperties.class
 })
 public class MailingPipelineApplication {
 

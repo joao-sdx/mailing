@@ -1,11 +1,13 @@
 package com.synapsedx.mailing.seo.batch.writer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.synapsedx.mailing.seo.NocobaseClient;
+import com.synapsedx.mailing.seo.SupabaseClient;
 import com.synapsedx.mailing.seo.batch.SeoJobContext;
+import com.synapsedx.mailing.seo.batch.SeoSummaryStore;
 import com.synapsedx.mailing.seo.config.DataForSeoProperties;
 import com.synapsedx.mailing.seo.model.DataForSeoRequest;
 import com.synapsedx.mailing.seo.model.NewsItem;
+import com.synapsedx.mailing.seo.model.SeoSummaryTask;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -34,7 +36,8 @@ public class DataForSeoResponseWriter implements ItemWriter<DataForSeoRequest> {
 
   private final DataForSeoProperties properties;
   private final SeoJobContext jobContext;
-  private final NocobaseClient nocobase;
+  private final SupabaseClient nocobase;
+  private final SeoSummaryStore summaryStore;
   private final ObjectMapper mapper = new ObjectMapper();
   private final HttpClient httpClient = HttpClient.newHttpClient();
 
@@ -42,25 +45,17 @@ public class DataForSeoResponseWriter implements ItemWriter<DataForSeoRequest> {
   public void write(Chunk<? extends DataForSeoRequest> chunk) throws Exception {
     for (var request : chunk.getItems()) {
       var rawResponse = post(NEWS_ENDPOINT, request.body());
+      var result = mapper.readTree(rawResponse).path("tasks").path(0).path("result").path(0);
+      var checkUrl = result.path("check_url").asText(null);
       var newsItems = parseItems(rawResponse);
 
-      var queryId = nocobase.create("seo_query", queryFields(request));
+      var queryId = nocobase.create("seo_query", queryFields(request, checkUrl));
       log.info("seo_query_created id={} keyword={}", queryId, request.query().keyword());
 
       for (var item : newsItems) {
-        var resultId =
-            nocobase.findByUrl("seo_result", item.url()).orElseGet(() -> createResult(item));
-        nocobase.addRelation("seo_query", queryId, "results", resultId);
-        log.info("seo_result_linked queryId={} resultId={} url={}", queryId, resultId, item.url());
+        summaryStore.add(new SeoSummaryTask(queryId, item));
+        log.info("seo_result_queued queryId={} url={}", queryId, item.url());
       }
-    }
-  }
-
-  private int createResult(NewsItem item) {
-    try {
-      return nocobase.create("seo_result", resultFields(item));
-    } catch (Exception e) {
-      throw new RuntimeException("Failed to create seo_result for url=" + item.url(), e);
     }
   }
 
@@ -127,7 +122,7 @@ public class DataForSeoResponseWriter implements ItemWriter<DataForSeoRequest> {
     }
   }
 
-  private Map<String, Object> queryFields(DataForSeoRequest request) {
+  private Map<String, Object> queryFields(DataForSeoRequest request, String checkUrl) {
     var q = request.query();
     var fields = new LinkedHashMap<String, Object>();
     fields.put("keyword", q.keyword());
@@ -137,16 +132,9 @@ public class DataForSeoResponseWriter implements ItemWriter<DataForSeoRequest> {
     fields.put("location_name", q.locationName());
     fields.put("file_prefix", q.filePrefix());
     fields.put("execution_date", Instant.ofEpochSecond(jobContext.jobStartTime()).toString());
-    return fields;
-  }
-
-  private Map<String, Object> resultFields(NewsItem item) {
-    var fields = new LinkedHashMap<String, Object>();
-    fields.put("type", "news");
-    fields.put("title", item.title());
-    fields.put("domain", item.domain());
-    fields.put("url", item.url());
-    fields.put("article", item.article());
+    if (checkUrl != null && !checkUrl.isBlank()) {
+      fields.put("check_url", checkUrl);
+    }
     return fields;
   }
 
