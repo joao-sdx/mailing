@@ -1,0 +1,2 @@
+ALTER TABLE crm_companies
+  ADD COLUMN IF NOT EXISTS enrich BOOLEAN DEFAULT false;

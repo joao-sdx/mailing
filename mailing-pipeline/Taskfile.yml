@@ -19,6 +19,10 @@ tasks:
     desc: Scan seo_result articles with LLM and upsert contacts in CRM
     cmd: '{{.MVN_EXEC}} spring-boot:run -Dspring-boot.run.arguments="--spring.batch.job.name=seo-contact"'
 
+  enrich-companies:
+    desc: Enrich crm_companies with Annuaire des Entreprises (enrich=false records only)
+    cmd: '{{.MVN_EXEC}} spring-boot:run -Dspring-boot.run.arguments="--spring.batch.job.name=enrich-companies"'
+
   sb-ping:
     desc: Ping Supabase PostgREST to verify connectivity
     vars:
