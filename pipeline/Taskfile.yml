@@ -1,0 +1,26 @@
+version: "3"
+vars:
+  MVN_EXEC: "../mvnw"
+
+tasks:
+  insee:
+    desc: Run the full INSEE pipeline (prepare → company-enrich)
+    vars:
+      RUN_ID:
+        sh: date +%s%3N
+    cmds:
+      - cmd: |
+          rm -fR workdir
+          mkdir -p workdir/01-siren
+          cp src/test/resources/insee.csv workdir/01-siren
+      - cmd: '{{.MVN_EXEC}} spring-boot:run "-Dspring-boot.run.arguments=--spring.batch.job.name=insee-pipeline --spring.batch.job.enabled=true run.id={{.RUN_ID}}"'
+
+  build:
+    desc: Build the pipeline jar
+    cmd: '{{.MVN_EXEC}} package -DskipTests'
+
+  clean:
+    desc: Remove build artifacts and workdir outputs
+    cmds:
+      - '{{.MVN_EXEC}} clean'
+      - rm -rf workdir

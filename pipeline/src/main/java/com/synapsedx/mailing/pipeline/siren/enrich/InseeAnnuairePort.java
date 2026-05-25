@@ -1,6 +1,6 @@
 package com.synapsedx.mailing.pipeline.siren.enrich;
 
-import com.synapsedx.mailing.pipeline.siren.enrich.annuaire.AnnuaireEntreprise;
+import com.synapsedx.mailing.pipeline.siren.enrich.model.annuaire.AnnuaireEntreprise;
 import java.util.Optional;
 
 /** Contract for looking up a company by SIREN from the Annuaire des Entreprises. */

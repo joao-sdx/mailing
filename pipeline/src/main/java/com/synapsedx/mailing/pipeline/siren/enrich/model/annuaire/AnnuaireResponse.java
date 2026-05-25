@@ -1,4 +1,4 @@
-package com.synapsedx.mailing.pipeline.siren.enrich.annuaire;
+package com.synapsedx.mailing.pipeline.siren.enrich.model.annuaire;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;

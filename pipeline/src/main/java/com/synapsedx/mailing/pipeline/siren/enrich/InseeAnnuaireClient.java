@@ -1,8 +1,8 @@
 package com.synapsedx.mailing.pipeline.siren.enrich;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.synapsedx.mailing.pipeline.siren.enrich.annuaire.AnnuaireEntreprise;
-import com.synapsedx.mailing.pipeline.siren.enrich.annuaire.AnnuaireResponse;
+import com.synapsedx.mailing.pipeline.siren.enrich.model.annuaire.AnnuaireEntreprise;
+import com.synapsedx.mailing.pipeline.siren.enrich.model.annuaire.AnnuaireResponse;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.net.http.HttpClient;

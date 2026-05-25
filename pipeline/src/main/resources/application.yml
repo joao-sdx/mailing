@@ -7,6 +7,8 @@ spring:
   batch:
     jdbc:
       initialize-schema: always
+    job:
+      enabled: false
 
 batch:
   workdir: workdir
@@ -14,19 +16,20 @@ batch:
     input-dir: ${batch.workdir}/01-siren
     done-dir: ${batch.workdir}/01-siren/done
     output-dir: ${batch.workdir}/02-siren-line
+  company-enrich:
+    input-dir: ${batch.workdir}/02-siren-line
+    done-dir: ${batch.workdir}/02-siren-line/done
+    company-output-dir: ${batch.workdir}/03-company
+    contact-output-dir: ${batch.workdir}/04-contact
+    relation-output-dir: ${batch.workdir}/05-relation
+  search-news-distribute:
+    company-input-dir: ${batch.workdir}/03-company
+    company-done-dir: ${batch.workdir}/03-company/done
+    company-output-dir: ${batch.workdir}/10-company-search-news
+    person-input-dir: ${batch.workdir}/04-contact
+    person-done-dir: ${batch.workdir}/04-contact/done
+    person-output-dir: ${batch.workdir}/11-person-search-news
 
-dataforseo:
-  api:
-    user: ${dataforseo.api.user}
-    key: ${dataforseo.api.key}
-
-seoit:
-  openai:
-    server: http://127.0.0.1:1234
-    model: nvidia/nemotron-3-nano-4b
-    key: ${openai.key}
-    connect-timeout-seconds: 10
-    request-timeout-seconds: 60
 
 
 
