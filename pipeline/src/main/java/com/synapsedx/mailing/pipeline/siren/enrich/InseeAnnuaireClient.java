@@ -36,7 +36,7 @@ public class InseeAnnuaireClient implements InseeAnnuairePort {
       Thread.sleep(CALL_DELAY_MS);
       return doFind(siren, 0);
     } catch (Exception e) {
-      log.warn("annuaire_api_failed siren={} reason={}", siren, e.getMessage());
+      log.warn("annuaire_api_failed siren={} reason={}", siren, e.toString());
       return Optional.empty();
     }
   }
