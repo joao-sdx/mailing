@@ -12,7 +12,7 @@ tasks:
       - cmd: |
           rm -fR workdir
           mkdir -p workdir/01-siren
-          cp src/test/resources/insee.csv workdir/01-siren
+          cp ../sources/insee/credit-bail.csv workdir/01-siren
       - cmd: '{{.MVN_EXEC}} spring-boot:run "-Dspring-boot.run.arguments=--spring.batch.job.name=insee-pipeline --spring.batch.job.enabled=true run.id={{.RUN_ID}}"'
 
   build:

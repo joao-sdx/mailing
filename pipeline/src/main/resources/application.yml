@@ -29,6 +29,10 @@ batch:
     person-input-dir: ${batch.workdir}/04-contact
     person-done-dir: ${batch.workdir}/04-contact/done
     person-output-dir: ${batch.workdir}/11-person-search-news
+  company-news-search:
+    input-dir: ${batch.workdir}/10-company-search-news
+    done-dir: ${batch.workdir}/10-company-search-news/done
+    output-dir: ${batch.workdir}/12-company-news
 
 
 

@@ -12,7 +12,10 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-/** Orchestrates all INSEE jobs sequentially: prepare → company-enrich → search-news-distribute. */
+/**
+ * Orchestrates all INSEE jobs sequentially: prepare → company-enrich → search-news-distribute →
+ * company-news-search.
+ */
 @Configuration
 @RequiredArgsConstructor
 public class IseePipelineJobConfig {
@@ -24,11 +27,13 @@ public class IseePipelineJobConfig {
   public Job iseePipelineJob(
       @Qualifier("pipelinePrepareStep") Step pipelinePrepareStep,
       @Qualifier("pipelineCompanyEnrichStep") Step pipelineCompanyEnrichStep,
-      @Qualifier("pipelineSearchNewsDistributeStep") Step pipelineSearchNewsDistributeStep) {
+      @Qualifier("pipelineSearchNewsDistributeStep") Step pipelineSearchNewsDistributeStep,
+      @Qualifier("pipelineCompanyNewsSearchStep") Step pipelineCompanyNewsSearchStep) {
     return new JobBuilder("insee-pipeline", jobRepository)
         .start(pipelinePrepareStep)
         .next(pipelineCompanyEnrichStep)
         .next(pipelineSearchNewsDistributeStep)
+        .next(pipelineCompanyNewsSearchStep)
         .build();
   }
 
@@ -55,6 +60,16 @@ public class IseePipelineJobConfig {
       @Qualifier("searchNewsDistributeJob") Job searchNewsDistributeJob) {
     return new StepBuilder("pipelineSearchNewsDistributeStep", jobRepository)
         .job(searchNewsDistributeJob)
+        .launcher(jobLauncher)
+        .parametersExtractor(new DefaultJobParametersExtractor())
+        .build();
+  }
+
+  @Bean
+  public Step pipelineCompanyNewsSearchStep(
+      @Qualifier("companyNewsSearchJob") Job companyNewsSearchJob) {
+    return new StepBuilder("pipelineCompanyNewsSearchStep", jobRepository)
+        .job(companyNewsSearchJob)
         .launcher(jobLauncher)
         .parametersExtractor(new DefaultJobParametersExtractor())
         .build();
