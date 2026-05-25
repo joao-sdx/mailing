@@ -1,0 +1,32 @@
+spring:
+  config:
+    import: optional:file:.env[.properties]
+  datasource:
+    url: jdbc:h2:mem:batchdb
+    driver-class-name: org.h2.Driver
+  batch:
+    jdbc:
+      initialize-schema: always
+
+batch:
+  workdir: workdir
+  siren:
+    input-dir: ${batch.workdir}/01-siren
+    done-dir: ${batch.workdir}/01-siren/done
+    output-dir: ${batch.workdir}/02-siren-line
+
+dataforseo:
+  api:
+    user: ${dataforseo.api.user}
+    key: ${dataforseo.api.key}
+
+seoit:
+  openai:
+    server: http://127.0.0.1:1234
+    model: nvidia/nemotron-3-nano-4b
+    key: ${openai.key}
+    connect-timeout-seconds: 10
+    request-timeout-seconds: 60
+
+
+
