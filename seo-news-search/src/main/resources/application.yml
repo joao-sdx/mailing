@@ -1,0 +1,14 @@
+spring:
+  batch:
+    job:
+      enabled: true
+    jdbc:
+      initialize-schema: always
+
+dataforseo:
+  api:
+    user: ${DATAFORSEO_USER}
+    key: ${DATAFORSEO_KEY}
+
+seo-news:
+  output-dir: output

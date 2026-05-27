@@ -1,0 +1,23 @@
+version: "3"
+
+vars:
+  MVN_EXEC: "../mvnw"
+
+tasks:
+  run:
+    desc: Run the seo-news-search pipeline (writes .md files to output/)
+    cmd: '{{.MVN_EXEC}} -pl seo-news-search spring-boot:run'
+
+  build:
+    desc: Build the jar
+    cmd: "{{.MVN_EXEC}} -pl seo-news-search package -DskipTests"
+
+  test:
+    desc: Run unit tests
+    cmd: "{{.MVN_EXEC}} -pl seo-news-search test"
+
+  clean:
+    desc: Remove build artifacts and output files
+    cmds:
+      - "{{.MVN_EXEC}} -pl seo-news-search clean"
+      - rm -rf output/
