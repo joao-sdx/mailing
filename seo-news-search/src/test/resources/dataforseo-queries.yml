@@ -1,0 +1,13 @@
+queries:
+  - keyword: "test query one"
+    language_code: fr
+    depth: 2
+    location_code: 2250
+    location_name: France
+    file_prefix: test-fr
+  - keyword: "test query two"
+    language_code: fr
+    depth: 5
+    location_code: 2250
+    location_name: France
+    file_prefix: test2-fr
