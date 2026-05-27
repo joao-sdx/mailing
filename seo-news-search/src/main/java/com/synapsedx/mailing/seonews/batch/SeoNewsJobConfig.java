@@ -18,7 +18,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 
 @Configuration
 @RequiredArgsConstructor
-public class SeoNewsJob {
+public class SeoNewsJobConfig {
 
   private final JobRepository jobRepository;
   private final PlatformTransactionManager transactionManager;
