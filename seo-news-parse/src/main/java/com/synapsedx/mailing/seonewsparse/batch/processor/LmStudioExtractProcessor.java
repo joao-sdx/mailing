@@ -93,7 +93,7 @@ public class LmStudioExtractProcessor implements ItemProcessor<Path, List<Person
               .asText("");
       content = content.replaceAll("(?s)```json\\s*", "").replaceAll("(?s)```\\s*", "").strip();
 
-      if (content.isEmpty() || "[]".equals(content)) {
+      if (content.isEmpty() || content.matches("\\[\\s*\\]")) {
         log.warn("llm_empty_response article={}", articlePath.getFileName());
         return null;
       }
@@ -133,7 +133,7 @@ public class LmStudioExtractProcessor implements ItemProcessor<Path, List<Person
     var response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
     log.debug("llm_call status={}", response.statusCode());
     if (response.statusCode() != 200) {
-      log.warn("llm_http_error article status={}", response.statusCode());
+      log.warn("llm_http_error status={}", response.statusCode());
       throw new IllegalStateException("LM Studio error status=" + response.statusCode());
     }
     return response.body();

@@ -112,6 +112,23 @@ class LmStudioExtractProcessorTest {
   }
 
   @Test
+  void noFrontmatterUsesFilenameAsTitle() throws Exception {
+    var mdFile = Files.createTempFile(tempDir, "plain", ".md");
+    Files.writeString(mdFile, "Just some plain text body with no frontmatter delimiters at all.");
+
+    mockResponse =
+        """
+        {"choices":[{"message":{"content":"[{\\"prenom\\":\\"Marie\\",\\"nom\\":\\"Martin\\",\\"societe\\":\\"AXA\\",\\"role\\":\\"DG\\",\\"email\\":\\"\\"}]"}}]}
+        """;
+
+    var result = processor.process(mdFile);
+
+    assertThat(result).isNotNull();
+    assertThat(result).hasSize(1);
+    assertThat(result.getFirst().articleName()).isEqualTo(mdFile.getFileName().toString());
+  }
+
+  @Test
   void frontmatterTitleExtracted() throws Exception {
     var mdFile = tempDir.resolve("titled.md");
     Files.writeString(
