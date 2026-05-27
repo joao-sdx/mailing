@@ -160,5 +160,6 @@ output
 .playwright-mcp/
 /sources/insee/StockUniteLegale_utf8.csv
 /sources/insee/StockUniteLegale_utf8.zip
-/pipeline/workdir/
-/pipeline/.env.properties
+workdir
+.env.properties
+output2handle
