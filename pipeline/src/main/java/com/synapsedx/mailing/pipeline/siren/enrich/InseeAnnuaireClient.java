@@ -10,6 +10,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -25,18 +26,33 @@ public class InseeAnnuaireClient implements InseeAnnuairePort {
   private static final long CALL_DELAY_MS = 500;
   private static final int MAX_RETRIES = 3;
   private static final long RETRY_BASE_DELAY_MS = 1_000;
+  private static final int MAX_CONSECUTIVE_FAILURES = 10;
 
   private final ObjectMapper objectMapper;
   private final HttpClient httpClient =
       HttpClient.newBuilder().version(HttpClient.Version.HTTP_1_1).build();
+  private final AtomicInteger consecutiveFailures = new AtomicInteger(0);
 
   @Override
   public Optional<AnnuaireEntreprise> findBySiren(String siren) {
+    if (consecutiveFailures.get() >= MAX_CONSECUTIVE_FAILURES) {
+      log.warn(
+          "annuaire_api_circuit_open siren={} consecutive_failures={}",
+          siren,
+          consecutiveFailures.get());
+      return Optional.empty();
+    }
     try {
       Thread.sleep(CALL_DELAY_MS);
-      return doFind(siren, 0);
+      var result = doFind(siren, 0);
+      consecutiveFailures.set(0);
+      return result;
     } catch (Exception e) {
-      log.warn("annuaire_api_failed siren={} reason={}", siren, e.toString());
+      log.warn(
+          "annuaire_api_failed siren={} consecutive={} reason={}",
+          siren,
+          consecutiveFailures.incrementAndGet(),
+          e.toString());
       return Optional.empty();
     }
   }
@@ -59,13 +75,12 @@ public class InseeAnnuaireClient implements InseeAnnuairePort {
         Thread.sleep(delay);
         return doFind(siren, attempt + 1);
       }
-      log.warn("annuaire_api_rate_limited_exhausted siren={}", siren);
-      return Optional.empty();
+      throw new IllegalStateException("rate_limited_exhausted status=429 siren=" + siren);
     }
 
     if (response.statusCode() != 200) {
-      log.warn("annuaire_api_error siren={} status={}", siren, response.statusCode());
-      return Optional.empty();
+      throw new IllegalStateException(
+          "unexpected_status=" + response.statusCode() + " siren=" + siren);
     }
 
     var parsed = objectMapper.readValue(response.body(), AnnuaireResponse.class);

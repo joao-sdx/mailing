@@ -51,8 +51,15 @@ public class DataForSeoClient implements DataForSeoPort {
   }
 
   private String post(String body) throws Exception {
-    var credentials = properties.getApi().getUser() + ":" + properties.getApi().getKey();
-    var auth = Base64.getEncoder().encodeToString(credentials.getBytes());
+    var user = properties.getApi().getUser();
+    var key = properties.getApi().getKey();
+    if (user == null || key == null) {
+      throw new IllegalStateException("dataforseo credentials not configured (user=" + user + ")");
+    }
+    var credentials = user + ":" + key;
+    var auth =
+        Base64.getEncoder()
+            .encodeToString(credentials.getBytes(java.nio.charset.StandardCharsets.UTF_8));
     var request =
         HttpRequest.newBuilder()
             .uri(URI.create(NEWS_ENDPOINT))

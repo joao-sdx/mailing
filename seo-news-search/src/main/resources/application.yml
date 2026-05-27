@@ -1,4 +1,6 @@
 spring:
+  config:
+    import: optional:file:.env[.properties]
   batch:
     job:
       enabled: true
@@ -7,8 +9,8 @@ spring:
 
 dataforseo:
   api:
-    user: ${DATAFORSEO_USER}
-    key: ${DATAFORSEO_KEY}
+    user: ${dataforseo.api.user}
+    key: ${dataforseo.api.key}
 
 seo-news:
   output-dir: output

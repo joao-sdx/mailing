@@ -3,7 +3,7 @@ vars:
   MVN_EXEC: "../mvnw"
 
 tasks:
-  insee:
+  insee-clean:
     desc: Run the full INSEE pipeline (prepare → company-enrich)
     vars:
       RUN_ID:
@@ -13,7 +13,16 @@ tasks:
           rm -fR workdir
           mkdir -p workdir/01-siren
           cp ../sources/insee/credit-bail.csv workdir/01-siren
+      - task: insee
+
+  insee:
+    desc: Run the full INSEE pipeline (prepare → company-enrich)
+    vars:
+      RUN_ID:
+        sh: date +%s%3N
+    cmds:
       - cmd: '{{.MVN_EXEC}} spring-boot:run "-Dspring-boot.run.arguments=--spring.batch.job.name=insee-pipeline --spring.batch.job.enabled=true run.id={{.RUN_ID}}"'
+
 
   build:
     desc: Build the pipeline jar

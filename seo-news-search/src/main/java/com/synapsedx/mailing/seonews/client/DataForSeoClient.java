@@ -28,7 +28,7 @@ public class DataForSeoClient {
       "https://api.dataforseo.com/v3/on_page/content_parsing/live";
 
   private final DataForSeoProperties properties;
-  private final ObjectMapper objectMapper;
+  private final ObjectMapper objectMapper = new ObjectMapper();
   private final HttpClient httpClient =
       HttpClient.newBuilder().version(HttpClient.Version.HTTP_1_1).build();
 

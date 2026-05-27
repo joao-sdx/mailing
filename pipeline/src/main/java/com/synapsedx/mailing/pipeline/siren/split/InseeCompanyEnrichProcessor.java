@@ -30,36 +30,40 @@ public class InseeCompanyEnrichProcessor implements ItemProcessor<CompanyRecord,
     }
     var siren = rcs.substring(FRENCH_RCS_PREFIX.length());
 
-    var annuaire = annuaireClient.findBySiren(siren);
     List<ContactRecord> contacts = new ArrayList<>();
     List<ParentCorporationRecord> parentCorps = new ArrayList<>();
     Integer nombreEtablissementsOuverts = null;
     Long ca = null;
     Long resultatNet = null;
 
-    if (annuaire.isPresent()) {
-      var e = annuaire.get();
-      nombreEtablissementsOuverts = e.nombreEtablissementsOuverts();
-      if (e.finances() != null && !e.finances().isEmpty()) {
-        var latestYear = e.finances().keySet().stream().max(String::compareTo).orElse(null);
-        if (latestYear != null) {
-          var finances = e.finances().get(latestYear);
-          ca = finances.ca();
-          resultatNet = finances.resultatNet();
-        }
-      }
-      var dirigeants = e.dirigeants();
-      if (dirigeants != null) {
-        for (var d : dirigeants) {
-          if ("personne morale".equals(d.typeDirigeant())) {
-            parentCorps.add(toParentCorp(rcs, d));
-          } else {
-            contacts.add(toContact(rcs, d));
+    try {
+      var annuaire = annuaireClient.findBySiren(siren);
+      if (annuaire.isPresent()) {
+        var e = annuaire.get();
+        nombreEtablissementsOuverts = e.nombreEtablissementsOuverts();
+        if (e.finances() != null && !e.finances().isEmpty()) {
+          var latestYear = e.finances().keySet().stream().max(String::compareTo).orElse(null);
+          if (latestYear != null) {
+            var finances = e.finances().get(latestYear);
+            ca = finances.ca();
+            resultatNet = finances.resultatNet();
           }
         }
+        var dirigeants = e.dirigeants();
+        if (dirigeants != null) {
+          for (var d : dirigeants) {
+            if ("personne morale".equals(d.typeDirigeant())) {
+              parentCorps.add(toParentCorp(rcs, d));
+            } else {
+              contacts.add(toContact(rcs, d));
+            }
+          }
+        }
+      } else {
+        log.warn("company_enrich_no_annuaire rcs={}", rcs);
       }
-    } else {
-      log.debug("company_enrich_no_annuaire rcs={}", rcs);
+    } catch (Exception e) {
+      log.warn("company_enrich_annuaire_failed rcs={} reason={}", rcs, e.toString());
     }
 
     var enriched =
