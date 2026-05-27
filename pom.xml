@@ -8,6 +8,7 @@
     <modules>
         <module>mailing-pipeline</module>
         <module>seo-news-search</module>
+        <module>seo-news-parse</module>
     </modules>
 
 
