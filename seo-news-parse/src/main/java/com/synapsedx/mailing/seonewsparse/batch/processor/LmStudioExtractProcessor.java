@@ -27,7 +27,6 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class LmStudioExtractProcessor implements ItemProcessor<Path, List<PersonRow>> {
 
-  private static final Pattern TITLE_PATTERN = Pattern.compile("title:\\s*\"(.+?)\"");
   private static final Pattern FRONTMATTER_SPLIT = Pattern.compile("(?m)^---\\s*$");
 
   private final LmStudioProperties properties;
@@ -66,12 +65,6 @@ public class LmStudioExtractProcessor implements ItemProcessor<Path, List<Person
         body = rawContent;
       }
 
-      var titleMatcher = TITLE_PATTERN.matcher(frontmatter);
-      var title =
-          titleMatcher.find()
-              ? titleMatcher.group(1).strip()
-              : articlePath.getFileName().toString();
-
       var userPrompt = userPromptTemplate.replace("{article_content}", body);
       var messages = mapper.createArrayNode();
       messages.add(mapper.createObjectNode().put("role", "system").put("content", systemPrompt));
@@ -98,6 +91,7 @@ public class LmStudioExtractProcessor implements ItemProcessor<Path, List<Person
         return null;
       }
 
+      var articleId = articlePath.getFileName().toString();
       var raw = mapper.readValue(content, new TypeReference<List<Map<String, String>>>() {});
       var contacts =
           raw.stream()
@@ -107,7 +101,7 @@ public class LmStudioExtractProcessor implements ItemProcessor<Path, List<Person
                           m.getOrDefault("prenom", ""),
                           m.getOrDefault("nom", ""),
                           m.getOrDefault("societe", ""),
-                          title))
+                          articleId))
               .toList();
 
       log.info(

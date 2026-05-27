@@ -56,7 +56,7 @@ class LmStudioExtractProcessorTest {
     assertThat(person.firstName()).isEqualTo("Jean");
     assertThat(person.lastName()).isEqualTo("Dupont");
     assertThat(person.company()).isEqualTo("BNP Paribas");
-    assertThat(person.articleName()).isEqualTo("Mon Article");
+    assertThat(person.articleId()).isEqualTo("article.md");
   }
 
   @Test
@@ -125,11 +125,11 @@ class LmStudioExtractProcessorTest {
 
     assertThat(result).isNotNull();
     assertThat(result).hasSize(1);
-    assertThat(result.getFirst().articleName()).isEqualTo(mdFile.getFileName().toString());
+    assertThat(result.getFirst().articleId()).isEqualTo(mdFile.getFileName().toString());
   }
 
   @Test
-  void frontmatterTitleExtracted() throws Exception {
+  void articleIdIsFilename() throws Exception {
     var mdFile = tempDir.resolve("titled.md");
     Files.writeString(
         mdFile,
@@ -151,6 +151,6 @@ class LmStudioExtractProcessorTest {
 
     assertThat(result).isNotNull();
     assertThat(result).hasSize(1);
-    assertThat(result.getFirst().articleName()).isEqualTo("Test Title");
+    assertThat(result.getFirst().articleId()).isEqualTo("titled.md");
   }
 }

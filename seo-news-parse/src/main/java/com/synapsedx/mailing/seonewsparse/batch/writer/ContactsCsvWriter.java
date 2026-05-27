@@ -20,7 +20,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class ContactsCsvWriter implements ItemWriter<List<PersonRow>>, StepExecutionListener {
 
-  private static final String HEADER = "first_name,last_name,company,article_name";
+  private static final String HEADER = "first_name,last_name,company,article_id";
 
   private final SeoNewsParseProperties properties;
   private boolean headerWritten = false;
@@ -60,7 +60,7 @@ public class ContactsCsvWriter implements ItemWriter<List<PersonRow>>, StepExecu
           .append(",")
           .append(escapeCsv(row.company()))
           .append(",")
-          .append(escapeCsv(row.articleName()))
+          .append(escapeCsv(row.articleId()))
           .append("\n");
     }
     Files.writeString(csvPath, sb.toString(), StandardOpenOption.APPEND);

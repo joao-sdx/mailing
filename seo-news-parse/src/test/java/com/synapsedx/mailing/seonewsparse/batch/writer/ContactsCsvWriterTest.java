@@ -35,11 +35,9 @@ class ContactsCsvWriterTest {
     var content = Files.readString(Path.of(csvPath));
     var lines = content.lines().toList();
 
-    assertThat(lines.getFirst()).isEqualTo("first_name,last_name,company,article_name");
+    assertThat(lines.getFirst()).isEqualTo("first_name,last_name,company,article_id");
     assertThat(
-            lines.stream()
-                .filter(l -> l.equals("first_name,last_name,company,article_name"))
-                .count())
+            lines.stream().filter(l -> l.equals("first_name,last_name,company,article_id")).count())
         .isEqualTo(1);
     assertThat(content).contains("Jean,Dupont,BNP,Article 1");
     assertThat(content).contains("Marie,Martin,AXA,Article 2");
