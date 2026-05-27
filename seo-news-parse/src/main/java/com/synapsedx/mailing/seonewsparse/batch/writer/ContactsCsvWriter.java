@@ -9,6 +9,8 @@ import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.batch.core.StepExecution;
+import org.springframework.batch.core.StepExecutionListener;
 import org.springframework.batch.item.Chunk;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.stereotype.Component;
@@ -16,12 +18,17 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class ContactsCsvWriter implements ItemWriter<List<PersonRow>> {
+public class ContactsCsvWriter implements ItemWriter<List<PersonRow>>, StepExecutionListener {
 
   private static final String HEADER = "first_name,last_name,company,article_name";
 
   private final SeoNewsParseProperties properties;
   private boolean headerWritten = false;
+
+  @Override
+  public void beforeStep(StepExecution stepExecution) {
+    headerWritten = false;
+  }
 
   @Override
   public void write(Chunk<? extends List<PersonRow>> chunk) throws Exception {
@@ -34,7 +41,10 @@ public class ContactsCsvWriter implements ItemWriter<List<PersonRow>> {
     }
 
     var csvPath = Path.of(properties.outputCsv());
-    Files.createDirectories(csvPath.getParent());
+    var parent = csvPath.getParent();
+    if (parent != null) {
+      Files.createDirectories(parent);
+    }
 
     if (!headerWritten) {
       Files.writeString(
