@@ -39,7 +39,6 @@ public class MarkdownDirectoryReader implements ItemReader<Path> {
 
   private void loadQueue() throws IOException {
     var dir = Path.of(properties.inputDir());
-    queue = new LinkedList<>();
     try (var stream =
         Files.find(dir, 1, (p, attr) -> attr.isRegularFile() && p.toString().endsWith(".md"))) {
       queue = stream.sorted().collect(Collectors.toCollection(LinkedList::new));
