@@ -27,8 +27,8 @@ class MarkdownDirectoryReaderTest {
     assertThat(first).isNotNull();
     assertThat(second).isNotNull();
     assertThat(third).isNull();
-    assertThat(first.getFileName().toString()).endsWith(".md");
-    assertThat(second.getFileName().toString()).endsWith(".md");
+    assertThat(first.getFileName().toString()).isEqualTo("article-a.md");
+    assertThat(second.getFileName().toString()).isEqualTo("article-b.md");
   }
 
   @Test
