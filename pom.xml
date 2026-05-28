@@ -10,6 +10,7 @@
         <module>seo-news-search</module>
         <module>seo-news-parse</module>
         <module>unitelegal2dataforseo</module>
+        <module>company-domain-lookup</module>
     </modules>
 
 
