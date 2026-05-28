@@ -42,5 +42,7 @@ class PropertiesBindingTest {
     assertThat(companyDomain.outputCsv()).isEqualTo("out.csv");
     assertThat(companyDomain.serpDepth()).isEqualTo(20);
     assertThat(companyDomain.serpTopN()).isEqualTo(7);
+    assertThat(dataforseo.serpOrganicEndpoint())
+        .isEqualTo("https://api.dataforseo.com/v3/serp/google/organic/live/advanced");
   }
 }

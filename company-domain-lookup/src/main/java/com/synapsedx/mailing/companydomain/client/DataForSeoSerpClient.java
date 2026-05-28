@@ -14,17 +14,12 @@ import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
 @RequiredArgsConstructor
 public class DataForSeoSerpClient {
-
-  @Value(
-      "${dataforseo.serp-organic-endpoint:https://api.dataforseo.com/v3/serp/google/organic/live/advanced}")
-  private String organicEndpoint;
 
   private final DataForSeoProperties properties;
   private final ObjectMapper objectMapper = new ObjectMapper();
@@ -46,7 +41,7 @@ public class DataForSeoSerpClient {
                     2250,
                     "location_name",
                     "France")));
-    var raw = post(organicEndpoint, body);
+    var raw = post(properties.serpOrganicEndpoint(), body);
     var items =
         objectMapper.readTree(raw).path("tasks").path(0).path("result").path(0).path("items");
     var results = new ArrayList<SerpResult>();
