@@ -1,0 +1,11 @@
+{
+  "tasks": [{
+    "result": [{
+      "items": [
+        {"type": "organic", "title": "Factofrance — Official", "url": "https://www.factofrance.com/", "description": "Official site"},
+        {"type": "organic", "title": "LinkedIn", "url": "https://www.linkedin.com/company/factofrance", "description": "LinkedIn page"},
+        {"type": "people_also_ask", "title": "ignored", "url": "https://x.com", "description": ""}
+      ]
+    }]
+  }]
+}
