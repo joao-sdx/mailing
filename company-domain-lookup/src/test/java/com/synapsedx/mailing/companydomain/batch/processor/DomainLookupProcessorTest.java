@@ -19,7 +19,7 @@ import org.junit.jupiter.api.Test;
 class DomainLookupProcessorTest {
 
   private final CompanyDomainProperties props =
-      new CompanyDomainProperties("in.csv", "out.csv", 10, 5);
+      new CompanyDomainProperties("in.csv", "out.csv", "", 10, 5);
 
   @Test
   void emptySerpReturnsEmptyDomain() throws Exception {
@@ -90,7 +90,7 @@ class DomainLookupProcessorTest {
                 new SerpResult("f", "https://f.com", "")));
     when(llm.pickOfficialDomain(eq("X"), any())).thenReturn(Optional.empty());
 
-    var smallProps = new CompanyDomainProperties("in.csv", "out.csv", 10, 3);
+    var smallProps = new CompanyDomainProperties("in.csv", "out.csv", "", 10, 3);
     var p = new DomainLookupProcessor(serp, llm, smallProps);
     p.setThrottleMillis(0);
     p.process("X");

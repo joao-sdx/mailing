@@ -13,7 +13,7 @@ class ContactsCsvReaderTest {
   void emitsEveryRowWithHeadersAndCompany() throws Exception {
     var props =
         new CompanyDomainProperties(
-            "src/test/resources/fixtures/contacts-sample.csv", "out.csv", 10, 5);
+            "src/test/resources/fixtures/contacts-sample.csv", "out.csv", "", 10, 5);
     var reader = new ContactsCsvReader(props);
 
     var all = new ArrayList<ContactRow>();

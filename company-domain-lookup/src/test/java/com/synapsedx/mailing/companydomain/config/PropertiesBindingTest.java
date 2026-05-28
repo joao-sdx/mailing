@@ -19,6 +19,7 @@ import org.springframework.test.context.TestPropertySource;
       "lmstudio.request-timeout-seconds=15",
       "company-domain.input-csv=in.csv",
       "company-domain.output-csv=out.csv",
+      "company-domain.articles-dir=/tmp/articles",
       "company-domain.serp-depth=20",
       "company-domain.serp-top-n=7",
       "spring.batch.job.enabled=false"
@@ -40,6 +41,7 @@ class PropertiesBindingTest {
     assertThat(lmstudio.requestTimeoutSeconds()).isEqualTo(15);
     assertThat(companyDomain.inputCsv()).isEqualTo("in.csv");
     assertThat(companyDomain.outputCsv()).isEqualTo("out.csv");
+    assertThat(companyDomain.articlesDir()).isEqualTo("/tmp/articles");
     assertThat(companyDomain.serpDepth()).isEqualTo(20);
     assertThat(companyDomain.serpTopN()).isEqualTo(7);
     assertThat(dataforseo.serpOrganicEndpoint())

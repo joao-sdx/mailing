@@ -18,7 +18,7 @@ class EnrichedContactsCsvWriterTest {
   @Test
   void writesHeaderOnceAcrossChunksAndAppendsDomain(@TempDir Path tmp) throws Exception {
     var out = tmp.resolve("out.csv");
-    var props = new CompanyDomainProperties("ignored", out.toString(), 10, 5);
+    var props = new CompanyDomainProperties("ignored", out.toString(), "", 10, 5);
     var writer = new EnrichedContactsCsvWriter(props);
     writer.beforeStep(new StepExecution("step", null));
 

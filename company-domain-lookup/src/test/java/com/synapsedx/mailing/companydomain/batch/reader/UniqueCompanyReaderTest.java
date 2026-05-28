@@ -13,7 +13,7 @@ class UniqueCompanyReaderTest {
   void emitsUniqueCompaniesPreservingFirstSeenOrder() throws Exception {
     var props =
         new CompanyDomainProperties(
-            "src/test/resources/fixtures/contacts-sample.csv", "out.csv", 10, 5);
+            "src/test/resources/fixtures/contacts-sample.csv", "out.csv", "", 10, 5);
     var reader = new UniqueCompanyReader(props);
 
     var seen = new ArrayList<String>();
@@ -29,7 +29,7 @@ class UniqueCompanyReaderTest {
   void failsFastWhenCompanyColumnMissing() {
     var props =
         new CompanyDomainProperties(
-            "src/test/resources/fixtures/no-company-header.csv", "out.csv", 10, 5);
+            "src/test/resources/fixtures/no-company-header.csv", "out.csv", "", 10, 5);
     var reader = new UniqueCompanyReader(props);
     assertThatThrownBy(reader::read)
         .isInstanceOf(IllegalStateException.class)
