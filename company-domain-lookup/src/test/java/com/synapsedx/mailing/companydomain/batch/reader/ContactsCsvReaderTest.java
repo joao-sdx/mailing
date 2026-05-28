@@ -1,6 +1,7 @@
 package com.synapsedx.mailing.companydomain.batch.reader;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.synapsedx.mailing.companydomain.config.CompanyDomainProperties;
 import com.synapsedx.mailing.companydomain.model.ContactRow;
@@ -39,7 +40,7 @@ class ContactsCsvReaderTest {
         new CompanyDomainProperties(
             "src/test/resources/fixtures/no-article-id-header.csv", "out.csv", "", 10, 5);
     var reader = new ContactsCsvReader(props);
-    org.assertj.core.api.Assertions.assertThatThrownBy(reader::read)
+    assertThatThrownBy(reader::read)
         .isInstanceOf(IllegalStateException.class)
         .hasMessageContaining("article_id");
   }
