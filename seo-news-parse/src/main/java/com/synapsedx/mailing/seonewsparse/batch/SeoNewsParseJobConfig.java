@@ -3,9 +3,8 @@ package com.synapsedx.mailing.seonewsparse.batch;
 import com.synapsedx.mailing.seonewsparse.batch.processor.LmStudioExtractProcessor;
 import com.synapsedx.mailing.seonewsparse.batch.reader.MarkdownDirectoryReader;
 import com.synapsedx.mailing.seonewsparse.batch.writer.ContactsCsvWriter;
-import com.synapsedx.mailing.seonewsparse.model.PersonRow;
+import com.synapsedx.mailing.seonewsparse.model.ArticleContacts;
 import java.nio.file.Path;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
@@ -34,7 +33,7 @@ public class SeoNewsParseJobConfig {
   @Bean
   public Step extractStep() {
     return new StepBuilder("extractStep", jobRepository)
-        .<Path, List<PersonRow>>chunk(1, transactionManager)
+        .<Path, ArticleContacts>chunk(1, transactionManager)
         .reader(markdownDirectoryReader)
         .processor(lmStudioExtractProcessor)
         .writer(contactsCsvWriter)

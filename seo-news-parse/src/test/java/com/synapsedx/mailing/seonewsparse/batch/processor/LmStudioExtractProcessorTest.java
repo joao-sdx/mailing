@@ -31,7 +31,7 @@ class LmStudioExtractProcessorTest {
   }
 
   @Test
-  void happyPath_returnsPersonRows() throws Exception {
+  void happyPath_returnsArticleContactsWithRole() throws Exception {
     var mdFile = tempDir.resolve("article.md");
     Files.writeString(
         mdFile,
@@ -51,12 +51,32 @@ class LmStudioExtractProcessorTest {
 
     var result = processor.process(mdFile);
 
-    assertThat(result).hasSize(1);
-    var person = result.getFirst();
+    assertThat(result).isNotNull();
+    assertThat(result.sourceArticle()).isEqualTo(mdFile);
+    assertThat(result.rows()).hasSize(1);
+    var person = result.rows().getFirst();
     assertThat(person.firstName()).isEqualTo("Jean");
     assertThat(person.lastName()).isEqualTo("Dupont");
+    assertThat(person.role()).isEqualTo("Directeur");
     assertThat(person.company()).isEqualTo("BNP Paribas");
     assertThat(person.articleId()).isEqualTo("article.md");
+  }
+
+  @Test
+  void missingRoleDefaultsToEmptyString() throws Exception {
+    var mdFile = tempDir.resolve("no-role.md");
+    Files.writeString(mdFile, "Body without frontmatter.");
+
+    mockResponse =
+        """
+        {"choices":[{"message":{"content":"[{\\"prenom\\":\\"Alice\\",\\"nom\\":\\"Martin\\",\\"societe\\":\\"Acme\\"}]"}}]}
+        """;
+
+    var result = processor.process(mdFile);
+
+    assertThat(result).isNotNull();
+    assertThat(result.rows()).hasSize(1);
+    assertThat(result.rows().getFirst().role()).isEqualTo("");
   }
 
   @Test
@@ -112,7 +132,7 @@ class LmStudioExtractProcessorTest {
   }
 
   @Test
-  void noFrontmatterUsesFilenameAsTitle() throws Exception {
+  void noFrontmatterUsesFilenameAsArticleId() throws Exception {
     var mdFile = Files.createTempFile(tempDir, "plain", ".md");
     Files.writeString(mdFile, "Just some plain text body with no frontmatter delimiters at all.");
 
@@ -124,33 +144,8 @@ class LmStudioExtractProcessorTest {
     var result = processor.process(mdFile);
 
     assertThat(result).isNotNull();
-    assertThat(result).hasSize(1);
-    assertThat(result.getFirst().articleId()).isEqualTo(mdFile.getFileName().toString());
-  }
-
-  @Test
-  void articleIdIsFilename() throws Exception {
-    var mdFile = tempDir.resolve("titled.md");
-    Files.writeString(
-        mdFile,
-        """
-        ---
-        title: "Test Title"
-        url: https://example.com
-        ---
-
-        Article body.
-        """);
-
-    mockResponse =
-        """
-        {"choices":[{"message":{"content":"[{\\"prenom\\":\\"Alice\\",\\"nom\\":\\"Martin\\",\\"societe\\":\\"Acme\\"}]"}}]}
-        """;
-
-    var result = processor.process(mdFile);
-
-    assertThat(result).isNotNull();
-    assertThat(result).hasSize(1);
-    assertThat(result.getFirst().articleId()).isEqualTo("titled.md");
+    assertThat(result.rows()).hasSize(1);
+    assertThat(result.rows().getFirst().articleId()).isEqualTo(mdFile.getFileName().toString());
+    assertThat(result.rows().getFirst().role()).isEqualTo("DG");
   }
 }

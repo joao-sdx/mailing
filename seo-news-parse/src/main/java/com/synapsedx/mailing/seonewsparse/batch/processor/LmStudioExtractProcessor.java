@@ -3,6 +3,7 @@ package com.synapsedx.mailing.seonewsparse.batch.processor;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.synapsedx.mailing.seonewsparse.config.LmStudioProperties;
+import com.synapsedx.mailing.seonewsparse.model.ArticleContacts;
 import com.synapsedx.mailing.seonewsparse.model.PersonRow;
 import jakarta.annotation.PostConstruct;
 import java.net.URI;
@@ -25,7 +26,7 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class LmStudioExtractProcessor implements ItemProcessor<Path, List<PersonRow>> {
+public class LmStudioExtractProcessor implements ItemProcessor<Path, ArticleContacts> {
 
   private static final Pattern FRONTMATTER_SPLIT = Pattern.compile("(?m)^---\\s*$");
 
@@ -50,20 +51,12 @@ public class LmStudioExtractProcessor implements ItemProcessor<Path, List<Person
   }
 
   @Override
-  public List<PersonRow> process(Path articlePath) {
+  public ArticleContacts process(Path articlePath) {
     try {
       var rawContent = Files.readString(articlePath);
 
       var parts = FRONTMATTER_SPLIT.split(rawContent, -1);
-      String frontmatter;
-      String body;
-      if (parts.length >= 3) {
-        frontmatter = parts[1];
-        body = parts[2];
-      } else {
-        frontmatter = "";
-        body = rawContent;
-      }
+      var body = parts.length >= 3 ? parts[2] : rawContent;
 
       var userPrompt = userPromptTemplate.replace("{article_content}", body);
       var messages = mapper.createArrayNode();
@@ -100,13 +93,14 @@ public class LmStudioExtractProcessor implements ItemProcessor<Path, List<Person
                       new PersonRow(
                           m.getOrDefault("prenom", ""),
                           m.getOrDefault("nom", ""),
+                          m.getOrDefault("role", ""),
                           m.getOrDefault("societe", ""),
                           articleId))
               .toList();
 
       log.info(
           "llm_contacts_found article={} count={}", articlePath.getFileName(), contacts.size());
-      return contacts;
+      return new ArticleContacts(articlePath, contacts);
 
     } catch (Exception e) {
       log.warn(
