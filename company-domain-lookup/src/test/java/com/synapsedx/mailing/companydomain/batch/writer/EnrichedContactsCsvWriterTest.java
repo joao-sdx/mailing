@@ -18,7 +18,7 @@ class EnrichedContactsCsvWriterTest {
   @Test
   void writesHeaderOnceAcrossChunksAndAppendsDomain(@TempDir Path tmp) throws Exception {
     var out = tmp.resolve("out.csv");
-    var props = new CompanyDomainProperties("ignored", out.toString(), 10, 5);
+    var props = new CompanyDomainProperties("ignored", out.toString(), "", 10, 5);
     var writer = new EnrichedContactsCsvWriter(props);
     writer.beforeStep(new StepExecution("step", null));
 
@@ -28,24 +28,33 @@ class EnrichedContactsCsvWriterTest {
             List.of(
                 new EnrichedContactRow(
                     new ContactRow(
-                        headers, List.of("A", "B", "Factofrance", "r1.md"), "Factofrance"),
-                    "factofrance.com"),
+                        headers, List.of("A", "B", "Factofrance", "r1.md"), "Factofrance", "r1.md"),
+                    "factofrance.com",
+                    "Résumé un"),
                 new EnrichedContactRow(
-                    new ContactRow(headers, List.of("C", "D", "Unknown", "r2.md"), "Unknown"),
+                    new ContactRow(
+                        headers, List.of("C", "D", "Unknown", "r2.md"), "Unknown", "r2.md"),
+                    "",
                     ""))));
     writer.write(
         new Chunk<>(
             List.of(
                 new EnrichedContactRow(
                     new ContactRow(
-                        headers, List.of("E,F", "G\"H", "Crédit Mutuel", "r3.md"), "Crédit Mutuel"),
-                    "creditmutuel.fr"))));
+                        headers,
+                        List.of("E,F", "G\"H", "Crédit Mutuel", "r3.md"),
+                        "Crédit Mutuel",
+                        "r3.md"),
+                    "creditmutuel.fr",
+                    "Résumé, avec virgule"))));
 
     var lines = Files.readAllLines(out);
     assertThat(lines).hasSize(4);
-    assertThat(lines.get(0)).isEqualTo("first_name,last_name,company,article_id,domain");
-    assertThat(lines.get(1)).isEqualTo("A,B,Factofrance,r1.md,factofrance.com");
-    assertThat(lines.get(2)).isEqualTo("C,D,Unknown,r2.md,");
-    assertThat(lines.get(3)).isEqualTo("\"E,F\",\"G\"\"H\",Crédit Mutuel,r3.md,creditmutuel.fr");
+    assertThat(lines.get(0)).isEqualTo("first_name,last_name,company,article_id,domain,summary");
+    assertThat(lines.get(1)).isEqualTo("A,B,Factofrance,r1.md,factofrance.com,Résumé un");
+    assertThat(lines.get(2)).isEqualTo("C,D,Unknown,r2.md,,");
+    assertThat(lines.get(3))
+        .isEqualTo(
+            "\"E,F\",\"G\"\"H\",Crédit Mutuel,r3.md,creditmutuel.fr,\"Résumé, avec virgule\"");
   }
 }

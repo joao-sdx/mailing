@@ -22,5 +22,6 @@ lmstudio:
 company-domain:
   input-csv: input/contacts.csv
   output-csv: output/contacts-with-domain.csv
+  articles-dir: ""
   serp-depth: 10
   serp-top-n: 5

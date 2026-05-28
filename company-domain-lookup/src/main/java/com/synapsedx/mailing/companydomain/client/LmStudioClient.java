@@ -27,6 +27,7 @@ public class LmStudioClient {
 
   private HttpClient httpClient;
   private String promptTemplate;
+  private String summaryPromptTemplate;
 
   @PostConstruct
   void init() throws Exception {
@@ -37,6 +38,9 @@ public class LmStudioClient {
             .build();
     promptTemplate =
         new ClassPathResource("domain-pick-prompt.md").getContentAsString(StandardCharsets.UTF_8);
+    summaryPromptTemplate =
+        new ClassPathResource("article-summary-prompt.md")
+            .getContentAsString(StandardCharsets.UTF_8);
   }
 
   public Optional<String> pickOfficialDomain(String company, List<SerpResult> results) {
@@ -77,6 +81,36 @@ public class LmStudioClient {
       return domain.isBlank() ? Optional.empty() : Optional.of(domain);
     } catch (Exception e) {
       log.warn("llm_pick_failed company={} reason={}", company, e.getMessage());
+      return Optional.empty();
+    }
+  }
+
+  public Optional<String> summarizeArticle(String articleBody) {
+    try {
+      var rendered = summaryPromptTemplate.replace("{{article}}", articleBody);
+
+      var messages = mapper.createArrayNode();
+      messages.add(mapper.createObjectNode().put("role", "user").put("content", rendered));
+
+      var requestNode = mapper.createObjectNode();
+      requestNode.put("model", properties.model());
+      requestNode.set("messages", messages);
+      requestNode.put("temperature", 0);
+      requestNode.put("max_tokens", 120);
+
+      var rawResponse = post(mapper.writeValueAsString(requestNode));
+      var content =
+          mapper
+              .readTree(rawResponse)
+              .path("choices")
+              .path(0)
+              .path("message")
+              .path("content")
+              .asText("");
+      content = content.replaceAll("(?s)```json\\s*", "").replaceAll("(?s)```\\s*", "").strip();
+      return content.isBlank() ? Optional.empty() : Optional.of(content);
+    } catch (Exception e) {
+      log.warn("article_summary_failed reason={}", e.getMessage());
       return Optional.empty();
     }
   }

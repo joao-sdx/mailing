@@ -3,6 +3,7 @@ package com.synapsedx.mailing.companydomain;
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.containing;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
+import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -98,23 +99,42 @@ class CompanyDomainLookupJobIT {
 
     LMSTUDIO_MOCK.stubFor(
         post(urlEqualTo("/v1/chat/completions"))
+            .withRequestBody(containing("Compagnie"))
             .willReturn(
                 aResponse()
                     .withStatus(200)
                     .withHeader("Content-Type", "application/json")
                     .withBody(
                         "{\"choices\":[{\"message\":{\"content\":\"{\\\"domain\\\":\\\"https://www.factofrance.com/\\\"}\"}}]}")));
+    LMSTUDIO_MOCK.stubFor(
+        post(urlEqualTo("/v1/chat/completions"))
+            .withRequestBody(containing("30 mots"))
+            .willReturn(
+                aResponse()
+                    .withStatus(200)
+                    .withHeader("Content-Type", "application/json")
+                    .withBody(
+                        "{\"choices\":[{\"message\":{\"content\":\"Résumé de l'article"
+                            + " test\"}}]}")));
 
     var execution = jobLauncherTestUtils.launchJob();
     assertThat(execution.getStatus().toString()).isEqualTo("COMPLETED");
 
     var lines = Files.readAllLines(OUTPUT_CSV);
     assertThat(lines).hasSize(6);
-    assertThat(lines.get(0)).isEqualTo("first_name,last_name,company,article_id,domain");
-    assertThat(lines.get(1)).isEqualTo("Philippe,Mutin,Factofrance,r1.md,factofrance.com");
-    assertThat(lines.get(2)).isEqualTo("Marc,Tyan,Factofrance,r2.md,factofrance.com");
-    assertThat(lines.get(3)).isEqualTo("Beñat,Cazanave,ARTZAINAK,r3.md,");
-    assertThat(lines.get(4)).isEqualTo("Isabelle,Gautier,Crédit Mutuel,r4.md,");
-    assertThat(lines.get(5)).isEqualTo("Jean,Test,,r5.md,");
+    assertThat(lines.get(0)).isEqualTo("first_name,last_name,company,article_id,domain,summary");
+    assertThat(lines.get(1))
+        .isEqualTo("Philippe,Mutin,Factofrance,r1.md,factofrance.com,Résumé de l'article test");
+    assertThat(lines.get(2))
+        .isEqualTo("Marc,Tyan,Factofrance,r2.md,factofrance.com,Résumé de l'article test");
+    assertThat(lines.get(3)).isEqualTo("Beñat,Cazanave,ARTZAINAK,r3.md,,Résumé de l'article test");
+    assertThat(lines.get(4))
+        .isEqualTo("Isabelle,Gautier,Crédit Mutuel,r4.md,,Résumé de l'article test");
+    assertThat(lines.get(5)).isEqualTo("Jean,Test,,r5.md,,Résumé de l'article test");
+
+    LMSTUDIO_MOCK.verify(
+        5,
+        postRequestedFor(urlEqualTo("/v1/chat/completions"))
+            .withRequestBody(containing("30 mots")));
   }
 }
