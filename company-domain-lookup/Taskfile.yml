@@ -1,0 +1,31 @@
+version: "3"
+
+vars:
+  MVN_EXEC: "../mvnw"
+
+tasks:
+  default:
+    desc: Run the company-domain-lookup pipeline
+    cmd: '{{.MVN_EXEC}} spring-boot:run'
+
+  run:
+    desc: "Run with custom input/output; pass INPUT_CSV and OUTPUT_CSV"
+    cmd: |
+      {{.MVN_EXEC}} spring-boot:run \
+        -Dspring-boot.run.arguments="--company-domain.input-csv={{.INPUT_CSV}} --company-domain.output-csv={{.OUTPUT_CSV}}"
+    requires:
+      vars: [INPUT_CSV, OUTPUT_CSV]
+
+  build:
+    desc: Build the jar
+    cmd: "{{.MVN_EXEC}} package -DskipTests"
+
+  test:
+    desc: Run unit tests
+    cmd: "{{.MVN_EXEC}} test"
+
+  clean:
+    desc: Remove build artifacts and output files
+    cmds:
+      - "{{.MVN_EXEC}} clean"
+      - rm -rf output/
