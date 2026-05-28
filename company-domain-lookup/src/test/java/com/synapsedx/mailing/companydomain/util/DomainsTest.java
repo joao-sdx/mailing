@@ -37,4 +37,10 @@ class DomainsTest {
   void returnsEmptyForUnparseableInput() {
     assertThat(Domains.extractHost("not a url at all")).isEqualTo("");
   }
+
+  @Test
+  void returnsEmptyForSlugWithoutTld() {
+    assertThat(Domains.extractHost("antinea-courtage")).isEqualTo("");
+    assertThat(Domains.extractHost("https://antinea-courtage")).isEqualTo("");
+  }
 }

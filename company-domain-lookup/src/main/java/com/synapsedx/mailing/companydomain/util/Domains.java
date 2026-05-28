@@ -18,7 +18,7 @@ public final class Domains {
     try {
       var uri = URI.create(trimmed);
       var host = uri.getHost();
-      if (host == null || host.isBlank()) {
+      if (host == null || host.isBlank() || !host.contains(".")) {
         return "";
       }
       if (host.startsWith("www.")) {
