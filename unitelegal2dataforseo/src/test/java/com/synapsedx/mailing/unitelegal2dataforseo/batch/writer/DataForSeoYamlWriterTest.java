@@ -44,7 +44,9 @@ class DataForSeoYamlWriterTest {
         .contains("depth: 2")
         .contains("location_code: 2250")
         .contains("location_name: \"France\"")
-        .contains("file_prefix: \"assurance-fr\"")
+        .contains("file_prefix: \"assurance-fr-1\"")
+        .contains("file_prefix: \"assurance-fr-2\"")
+        .contains("file_prefix: \"assurance-fr-3\"")
         .contains("- keyword: \"EDF\"")
         .contains("- keyword: \"ELECTRICITE DE FRANCE\"")
         .doesNotStartWith("---");

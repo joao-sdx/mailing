@@ -8,6 +8,14 @@ tasks:
     desc: Run the seo-news-parse pipeline (writes contacts.csv)
     cmd: '{{.MVN_EXEC}} spring-boot:run'
 
+  run:
+    desc: "Run with custom input/output; pass INPUT_DIR and OUTPUT_CSV"
+    cmd: |
+      {{.MVN_EXEC}} spring-boot:run \
+        -Dspring-boot.run.arguments="--seo-news-parse.input-dir={{.INPUT_DIR}} --seo-news-parse.output-csv={{.OUTPUT_CSV}}"
+    requires:
+      vars: [INPUT_DIR, OUTPUT_CSV]
+
   build:
     desc: Build the jar
     cmd: "{{.MVN_EXEC}} package -DskipTests"

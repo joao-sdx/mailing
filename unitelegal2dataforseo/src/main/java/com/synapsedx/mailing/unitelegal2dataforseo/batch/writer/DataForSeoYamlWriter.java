@@ -58,6 +58,7 @@ public class DataForSeoYamlWriter implements ItemStreamWriter<KeywordBatch> {
   public void write(Chunk<? extends KeywordBatch> chunk) throws Exception {
     for (var batch : chunk.getItems()) {
       for (var keyword : batch.keywords()) {
+        written++;
         var query =
             new DataForSeoQuery(
                 keyword,
@@ -65,9 +66,8 @@ public class DataForSeoYamlWriter implements ItemStreamWriter<KeywordBatch> {
                 defaults.depth(),
                 defaults.locationCode(),
                 defaults.locationName(),
-                defaults.filePrefix());
+                defaults.filePrefix() + "-" + written);
         writeListItem(query);
-        written++;
       }
     }
   }

@@ -13,4 +13,5 @@ dataforseo:
     key: ${dataforseo.api.key}
 
 seo-news:
+  input-yml: classpath:dataforseo-queries.yml
   output-dir: output

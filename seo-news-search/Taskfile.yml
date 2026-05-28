@@ -8,6 +8,14 @@ tasks:
     desc: Run the seo-news-search pipeline (writes .md files to output/)
     cmd: '{{.MVN_EXEC}} spring-boot:run'
 
+  run:
+    desc: "Run with custom input/output; pass INPUT_YML and OUTPUT_DIR"
+    cmd: |
+      {{.MVN_EXEC}} spring-boot:run \
+        -Dspring-boot.run.arguments="--seo-news.input-yml={{.INPUT_YML}} --seo-news.output-dir={{.OUTPUT_DIR}}"
+    requires:
+      vars: [INPUT_YML, OUTPUT_DIR]
+
   build:
     desc: Build the jar
     cmd: "{{.MVN_EXEC}} package -DskipTests"

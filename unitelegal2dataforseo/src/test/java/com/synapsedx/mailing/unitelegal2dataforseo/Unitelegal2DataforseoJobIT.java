@@ -57,7 +57,7 @@ class Unitelegal2DataforseoJobIT {
         .containsEntry("depth", 2)
         .containsEntry("location_code", 2250)
         .containsEntry("location_name", "France")
-        .containsEntry("file_prefix", "assurance-fr");
+        .hasEntrySatisfying("file_prefix", v -> assertThat(v).asString().matches(".+-\\d+"));
     assertThat(queries.get(1))
         .containsEntry("keyword", "SET - HUILLIER - SOCIETE D'ENTREPOSAGE ET DE TRANSPORTS");
     // Row 3 has two distinct keywords (EDF, ELECTRICITE DE FRANCE) — both kept.

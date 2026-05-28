@@ -1,6 +1,6 @@
 query-defaults:
   language-code: fr
-  depth: 2
+  depth: 10
   location-code: 2250
   location-name: France
-  file-prefix: assurance-fr
+  file-prefix: result

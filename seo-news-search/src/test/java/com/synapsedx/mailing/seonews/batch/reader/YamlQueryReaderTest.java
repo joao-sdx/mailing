@@ -2,13 +2,16 @@ package com.synapsedx.mailing.seonews.batch.reader;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.synapsedx.mailing.seonews.config.SeoNewsProperties;
 import org.junit.jupiter.api.Test;
+import org.springframework.core.io.DefaultResourceLoader;
 
 class YamlQueryReaderTest {
 
   @Test
   void readsAllQueriesFromYaml() throws Exception {
-    var reader = new YamlQueryReader();
+    var properties = new SeoNewsProperties("classpath:dataforseo-queries.yml", "output");
+    var reader = new YamlQueryReader(properties, new DefaultResourceLoader());
 
     var q1 = reader.read();
     var q2 = reader.read();

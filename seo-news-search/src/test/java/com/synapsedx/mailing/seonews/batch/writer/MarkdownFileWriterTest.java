@@ -20,7 +20,7 @@ class MarkdownFileWriterTest {
 
   @BeforeEach
   void setUp() throws Exception {
-    writer = new MarkdownFileWriter(new SeoNewsProperties(tempDir.toString()));
+    writer = new MarkdownFileWriter(new SeoNewsProperties(null, tempDir.toString()));
     writer.init();
   }
 
