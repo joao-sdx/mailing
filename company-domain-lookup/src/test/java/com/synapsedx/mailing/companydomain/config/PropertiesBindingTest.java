@@ -35,6 +35,7 @@ class PropertiesBindingTest {
     assertThat(dataforseo.api().key()).isEqualTo("k");
     assertThat(lmstudio.server()).isEqualTo("http://x:1");
     assertThat(lmstudio.model()).isEqualTo("m");
+    assertThat(lmstudio.key()).isEqualTo("lm-studio");
     assertThat(lmstudio.connectTimeoutSeconds()).isEqualTo(5);
     assertThat(lmstudio.requestTimeoutSeconds()).isEqualTo(15);
     assertThat(companyDomain.inputCsv()).isEqualTo("in.csv");
