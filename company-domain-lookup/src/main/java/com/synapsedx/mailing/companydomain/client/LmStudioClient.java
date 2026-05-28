@@ -54,7 +54,6 @@ public class LmStudioClient {
       requestNode.set("messages", messages);
       requestNode.put("temperature", 0);
       requestNode.put("max_tokens", 200);
-      requestNode.set("response_format", mapper.createObjectNode().put("type", "json_object"));
 
       var rawResponse = post(mapper.writeValueAsString(requestNode));
       var content =
@@ -65,6 +64,7 @@ public class LmStudioClient {
               .path("message")
               .path("content")
               .asText("");
+      content = content.replaceAll("(?s)```json\\s*", "").replaceAll("(?s)```\\s*", "").strip();
       if (content.isBlank()) {
         log.warn("llm_empty_response company={}", company);
         return Optional.empty();
@@ -103,7 +103,8 @@ public class LmStudioClient {
     var response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
     log.debug("llm_call status={}", response.statusCode());
     if (response.statusCode() != 200) {
-      throw new IllegalStateException("LM Studio error status=" + response.statusCode());
+      throw new IllegalStateException(
+          "LM Studio error status=" + response.statusCode() + " body=" + response.body());
     }
     return response.body();
   }
