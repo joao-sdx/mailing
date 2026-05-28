@@ -72,7 +72,7 @@ company-domain-lookup/
     config/
       CompanyDomainProperties.java         (@ConfigurationProperties("company-domain"))
       DataForSeoProperties.java            (copied pattern; prefix "dataforseo")
-      LmStudioProperties.java              (copied pattern; prefix "lm-studio")
+      LmStudioProperties.java              (copied pattern; prefix "lmstudio")
     client/
       DataForSeoSerpClient.java            (organic SERP only)
       LmStudioClient.java                  (chat-completions, JSON response)
@@ -121,18 +121,57 @@ company-domain:
   serp-top-n: 5
 ```
 
-`DataForSeoProperties` mirrors the existing one (api.user, api.key). Throttle
-is enforced at the processor level (see below).
+`DataForSeoProperties` (record, prefix `dataforseo`):
 
-`LmStudioProperties` mirrors the existing one in `seo-news-parse` (base-url,
-model, temperature, max-tokens, request-timeout-seconds, prompt-path).
+```java
+@ConfigurationProperties("dataforseo")
+public record DataForSeoProperties(Api api) {
+  public record Api(String user, String key) {}
+}
+```
+
+```yaml
+dataforseo:
+  api:
+    user: ${dataforseo.api.user}
+    key: ${dataforseo.api.key}
+```
+
+Throttle (2 req/s) is enforced at the processor level (see below).
+
+`LmStudioProperties` (record, prefix `lmstudio`):
+
+```java
+@ConfigurationProperties("lmstudio")
+public record LmStudioProperties(
+    String server,
+    String model,
+    String key,
+    int connectTimeoutSeconds,
+    int requestTimeoutSeconds) {}
+```
+
+```yaml
+lmstudio:
+  server: http://127.0.0.1:1234
+  model: nvidia/nemotron-3-nano-4b
+  key: ${openai.key:lm-studio}
+  connect-timeout-seconds: 10
+  request-timeout-seconds: 60
+```
+
+The prompt is loaded from a fixed classpath resource
+(`src/main/resources/domain-pick-prompt.md`); it is not a configurable
+property. `temperature` and `max_tokens` are hard-coded in the client at
+sensible defaults for a JSON classification task (`temperature=0`,
+`max_tokens=200`).
 
 CLI overrides:
 
 ```
 --company-domain.input-csv=...  --company-domain.output-csv=...
 --dataforseo.api.user=...        --dataforseo.api.key=...
---lm-studio.base-url=...
+--lmstudio.server=...            --lmstudio.model=...
 ```
 
 ### Two-step Spring Batch job
@@ -282,9 +321,17 @@ don't pull in a template engine.)
 
 Behavior:
 
-- POST to `{baseUrl}/v1/chat/completions` with `model`, `temperature`,
-  `max_tokens`, `response_format: {"type":"json_object"}` and a single user
-  message with the rendered prompt.
+- POST to `{server}/v1/chat/completions` with body containing `model`
+  (from `LmStudioProperties.model()`), `temperature: 0`, `max_tokens: 200`,
+  `response_format: {"type":"json_object"}`, and a single user message with
+  the rendered prompt.
+- `Authorization: Bearer <LmStudioProperties.key()>` header (LM Studio
+  accepts the literal `lm-studio` placeholder; this also makes the client
+  drop-in for real OpenAI-compatible endpoints).
+- HTTP client built with
+  `HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(connectTimeoutSeconds))`,
+  per-request timeout
+  `HttpRequest.newBuilder().timeout(Duration.ofSeconds(requestTimeoutSeconds))`.
 - Parse the response, extract `choices[0].message.content`, parse as JSON,
   read `domain` field.
 - If `domain` is JSON null, return `Optional.empty()`.
