@@ -28,18 +28,25 @@ class EnrichedContactsCsvWriterTest {
             List.of(
                 new EnrichedContactRow(
                     new ContactRow(
-                        headers, List.of("A", "B", "Factofrance", "r1.md"), "Factofrance"),
-                    "factofrance.com"),
+                        headers, List.of("A", "B", "Factofrance", "r1.md"), "Factofrance", "r1.md"),
+                    "factofrance.com",
+                    ""),
                 new EnrichedContactRow(
-                    new ContactRow(headers, List.of("C", "D", "Unknown", "r2.md"), "Unknown"),
+                    new ContactRow(
+                        headers, List.of("C", "D", "Unknown", "r2.md"), "Unknown", "r2.md"),
+                    "",
                     ""))));
     writer.write(
         new Chunk<>(
             List.of(
                 new EnrichedContactRow(
                     new ContactRow(
-                        headers, List.of("E,F", "G\"H", "Crédit Mutuel", "r3.md"), "Crédit Mutuel"),
-                    "creditmutuel.fr"))));
+                        headers,
+                        List.of("E,F", "G\"H", "Crédit Mutuel", "r3.md"),
+                        "Crédit Mutuel",
+                        "r3.md"),
+                    "creditmutuel.fr",
+                    ""))));
 
     var lines = Files.readAllLines(out);
     assertThat(lines).hasSize(4);

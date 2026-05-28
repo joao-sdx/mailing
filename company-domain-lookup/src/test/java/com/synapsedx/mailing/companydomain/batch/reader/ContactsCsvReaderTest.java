@@ -27,8 +27,20 @@ class ContactsCsvReaderTest {
     assertThat(first.headers()).containsExactly("first_name", "last_name", "company", "article_id");
     assertThat(first.values()).containsExactly("Beñat", "Cazanave", "ARTZAINAK", "result-10-01.md");
     assertThat(first.company()).isEqualTo("ARTZAINAK");
+    assertThat(first.articleId()).isEqualTo("result-10-01.md");
 
     var rowWithEmptyCompany = all.get(5);
     assertThat(rowWithEmptyCompany.company()).isEqualTo("");
+  }
+
+  @Test
+  void failsFastWhenArticleIdColumnMissing() {
+    var props =
+        new CompanyDomainProperties(
+            "src/test/resources/fixtures/no-article-id-header.csv", "out.csv", "", 10, 5);
+    var reader = new ContactsCsvReader(props);
+    org.assertj.core.api.Assertions.assertThatThrownBy(reader::read)
+        .isInstanceOf(IllegalStateException.class)
+        .hasMessageContaining("article_id");
   }
 }

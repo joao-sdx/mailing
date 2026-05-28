@@ -20,6 +20,7 @@ public class ContactsCsvReader implements ItemReader<ContactRow> {
   private final CompanyDomainProperties properties;
   private List<String> headers;
   private int companyIdx = -1;
+  private int articleIdIdx = -1;
   private Iterator<String> dataLines;
 
   @Override
@@ -33,7 +34,9 @@ public class ContactsCsvReader implements ItemReader<ContactRow> {
     var fields = CsvLineParser.parse(dataLines.next());
     var company =
         companyIdx >= 0 && companyIdx < fields.size() ? fields.get(companyIdx).trim() : "";
-    return new ContactRow(headers, fields, company);
+    var articleId =
+        articleIdIdx >= 0 && articleIdIdx < fields.size() ? fields.get(articleIdIdx).trim() : "";
+    return new ContactRow(headers, fields, company, articleId);
   }
 
   private void init() throws Exception {
@@ -47,6 +50,11 @@ public class ContactsCsvReader implements ItemReader<ContactRow> {
     if (companyIdx < 0) {
       throw new IllegalStateException(
           "input CSV missing 'company' column; headers=" + headers + " file=" + path);
+    }
+    articleIdIdx = headers.indexOf("article_id");
+    if (articleIdIdx < 0) {
+      throw new IllegalStateException(
+          "input CSV missing 'article_id' column; headers=" + headers + " file=" + path);
     }
     dataLines = lines.subList(1, lines.size()).iterator();
     log.info(

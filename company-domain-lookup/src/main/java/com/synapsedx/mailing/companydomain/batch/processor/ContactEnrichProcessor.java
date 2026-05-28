@@ -1,5 +1,6 @@
 package com.synapsedx.mailing.companydomain.batch.processor;
 
+import com.synapsedx.mailing.companydomain.batch.support.ArticleSummaryMap;
 import com.synapsedx.mailing.companydomain.batch.support.CompanyDomainMap;
 import com.synapsedx.mailing.companydomain.model.ContactRow;
 import com.synapsedx.mailing.companydomain.model.EnrichedContactRow;
@@ -12,11 +13,14 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class ContactEnrichProcessor implements ItemProcessor<ContactRow, EnrichedContactRow> {
 
-  private final CompanyDomainMap map;
+  private final CompanyDomainMap domainMap;
+  private final ArticleSummaryMap summaryMap;
 
   @Override
   public EnrichedContactRow process(ContactRow row) {
     var key = row.company().trim().toUpperCase(Locale.ROOT);
-    return new EnrichedContactRow(row, map.get(key));
+    var domain = domainMap.get(key);
+    var summary = summaryMap.get(row.articleId());
+    return new EnrichedContactRow(row, domain, summary);
   }
 }
