@@ -1,0 +1,12 @@
+queries:
+  - source: TED
+    filter:
+      keywords: ["logiciel", "digitalisation"]
+      countries: [FRA]
+      publicationDateFrom: "2026-01-01"
+      activeOnly: true
+  - source: BOAMP
+    filter:
+      keywords: ["logiciel"]
+      departments: ["75", "92"]
+      publicationDateFrom: "2026-01-01"

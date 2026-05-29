@@ -1,0 +1,23 @@
+spring:
+  config:
+    import: optional:file:.env[.properties]
+  batch:
+    job:
+      enabled: true
+    jdbc:
+      initialize-schema: always
+
+procurement:
+  input-yml: classpath:procurement-queries.yml
+  output-csv: output/tenders.csv
+  throttle-millis: 500
+
+ted:
+  search-endpoint: https://api.ted.europa.eu/v3/notices/search
+  connect-timeout-seconds: 10
+  request-timeout-seconds: 30
+
+boamp:
+  records-endpoint: https://boamp-datadila.opendatasoft.com/api/explore/v2.1/catalog/datasets/boamp/records
+  connect-timeout-seconds: 10
+  request-timeout-seconds: 30

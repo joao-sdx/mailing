@@ -11,6 +11,7 @@
         <module>seo-news-parse</module>
         <module>unitelegal2dataforseo</module>
         <module>company-domain-lookup</module>
+        <module>procurement-search</module>
     </modules>
 
 
