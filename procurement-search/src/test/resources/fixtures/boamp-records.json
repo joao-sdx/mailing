@@ -1,0 +1,23 @@
+{
+  "total_count": 2,
+  "results": [
+    {
+      "idweb": "26-0001",
+      "objet": "Acquisition de logiciels",
+      "nomacheteur": "Mairie de Marseille",
+      "dateparution": "2026-01-10",
+      "datelimitereponse": "2026-02-15T18:00:00+01:00",
+      "descripteur_libelle": ["Logiciels"],
+      "url_avis": "https://www.boamp.fr/pages/avis/?q=idweb:26-0001"
+    },
+    {
+      "idweb": "26-0002",
+      "objet": "Maintenance informatique",
+      "nomacheteur": "Département du Rhône",
+      "dateparution": "2026-01-11",
+      "datelimitereponse": null,
+      "descripteur_libelle": [],
+      "url_avis": "https://www.boamp.fr/pages/avis/?q=idweb:26-0002"
+    }
+  ]
+}
