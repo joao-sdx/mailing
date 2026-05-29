@@ -96,7 +96,7 @@ public class LmStudioClient {
       requestNode.put("model", properties.model());
       requestNode.set("messages", messages);
       requestNode.put("temperature", 0);
-      requestNode.put("max_tokens", 120);
+      requestNode.put("max_tokens", properties.summaryMaxTokens());
 
       var rawResponse = post(mapper.writeValueAsString(requestNode));
       var content =

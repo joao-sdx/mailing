@@ -136,5 +136,10 @@ class CompanyDomainLookupJobIT {
         5,
         postRequestedFor(urlEqualTo("/v1/chat/completions"))
             .withRequestBody(containing("30 mots")));
+    LMSTUDIO_MOCK.verify(
+        5,
+        postRequestedFor(urlEqualTo("/v1/chat/completions"))
+            .withRequestBody(containing("30 mots"))
+            .withRequestBody(containing("\"max_tokens\":1024")));
   }
 }
