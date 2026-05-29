@@ -2,7 +2,7 @@ queries:
   - source: TED
     filter:
       keywords: ["logiciel", "digitalisation"]
-      countries: [FRA]
+      countries: [FRA, PRT, ESP]
       publicationDateFrom: "2026-01-01"
       activeOnly: true
   - source: BOAMP

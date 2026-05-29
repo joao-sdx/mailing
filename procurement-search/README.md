@@ -1,62 +1,75 @@
-# procurement-search
+# procurement-search — User Manual
 
-Monitor EU and French public procurement tenders from a single command.
-
-## 1. What it does
-
-`procurement-search` queries **TED** (Tenders Electronic Daily — the EU-wide official journal covering all member states) and **BOAMP** (Bulletin Officiel des Annonces de Marchés Publics — France's national procurement bulletin) for active and open tenders that match your filters. Results from both sources are merged into a single CSV file you can open in Excel or feed to the next pipeline step. Both APIs are public — no registration or API key is needed for standard use. BASE/Portugal is not yet supported (see [Limitations](#7-limitations)).
+Query EU and French public procurement sources, get a single CSV of open tenders you can bid on.
 
 ---
 
-## 2. Prerequisites
+## What you get
 
-- **Java 21** — must be installed and on your `PATH`
-- **Run from the root of the `mailing` repo** — the Maven wrapper `./mvnw` lives at the repo root; the commands below use `../mvnw` because you `cd` into `procurement-search` first
-- **`go-task`** — optional, but makes running much easier; install from https://taskfile.dev
+Run one command, point it at a YAML file with your search criteria, and get `tenders.csv` with every matching open tender from:
 
-No API keys are required. Both TED and BOAMP are freely accessible public APIs.
+- **TED** (Tenders Electronic Daily) — the official EU procurement journal. Covers all 27 member states, all sectors, all languages. Free, no account needed.
+- **BOAMP** (Bulletin Officiel des Annonces de Marchés Publics) — France's national procurement bulletin. Best for tenders that never make it to TED (below EU threshold). Free, no account needed.
+
+Both sources are queried in one run. Results land in one file.
+
+> **Note:** BASE/Portugal (below-threshold Portuguese tenders) is not yet supported — see [Known limitations](#known-limitations).
 
 ---
 
-## 3. Quick start
+## Before you start
 
-**With go-task (recommended):**
+You need:
+
+- **Java 21** on your `PATH`
+- The **`mailing` repo** checked out (the Maven wrapper `../mvnw` is at the repo root)
+- **`go-task`** — optional but recommended; install from https://taskfile.dev
+
+No API keys, no registration, no accounts.
+
+---
+
+## Your first search
+
+The repo ships with a sample query file you can run immediately:
+
 ```bash
 cd procurement-search
 task run INPUT_YML=src/main/resources/procurement-queries.yml OUTPUT_CSV=output/tenders.csv
 ```
 
-**Without go-task:**
+Without go-task:
+
 ```bash
 cd procurement-search
 ../mvnw spring-boot:run \
   -Dspring-boot.run.arguments="--procurement.input-yml=src/main/resources/procurement-queries.yml --procurement.output-csv=output/tenders.csv"
 ```
 
-`src/main/resources/procurement-queries.yml` is the built-in sample. **Copy it to a working location and edit it** — don't modify the file in `src/main/resources` directly, as it will be overwritten on the next build.
-
-```bash
-cp src/main/resources/procurement-queries.yml my-queries.yml
-# edit my-queries.yml
-task run INPUT_YML=my-queries.yml OUTPUT_CSV=output/tenders.csv
-```
+Open `output/tenders.csv` when it finishes. Each row is one tender.
 
 ---
 
-## 4. Configuring queries
+## Customising your search
 
-This is where you control what tenders get fetched. Everything lives in your YAML file.
+Copy the sample file and edit it — don't edit the one inside `src/main/resources/` directly.
 
-### 4.1 Structure
+```bash
+cp src/main/resources/procurement-queries.yml my-queries.yml
+# edit my-queries.yml, then:
+task run INPUT_YML=my-queries.yml OUTPUT_CSV=output/tenders.csv
+```
 
-The file is a YAML list of queries. Each query targets one source (`TED` or `BOAMP`) and specifies either a high-level `filter` or a `rawQuery` sent verbatim to the source's own query engine.
+### The query file format
+
+A YAML list of queries. Each query targets one source and tells it what to look for.
 
 ```yaml
 queries:
   - source: TED
     filter:
       keywords: ["logiciel", "digitalisation"]
-      countries: [FRA, LUX]
+      countries: [FRA, PRT, ESP]
       publicationDateFrom: "2026-01-01"
       activeOnly: true
 
@@ -67,49 +80,39 @@ queries:
       publicationDateFrom: "2026-01-01"
 ```
 
-You can have as many queries as you like — TED and BOAMP entries can be freely mixed. All results land in the same output CSV.
+You can have as many queries as you want, mixing TED and BOAMP freely. All results land in the same CSV.
 
-### 4.2 Filter fields
+---
 
-| Field | Type | TED | BOAMP | Notes |
-|---|---|---|---|---|
-| `keywords` | list of strings | ✅ full-text (`FT ~ term`) | ✅ full-text (`search(objet,"term")`) | AND-joined; each keyword is a separate clause |
-| `publicationDateFrom` | date (`YYYY-MM-DD`) | ✅ | ✅ | inclusive start date for publication |
-| `countries` | list of ISO-3166 alpha-3 | ✅ | ❌ ignored | e.g. `[FRA, DEU, LUX]`; BOAMP is always France |
-| `departments` | list of strings | ❌ ignored | ✅ | BOAMP `code_departement`, e.g. `["75", "92", "13"]` |
-| `activeOnly` | boolean | ✅ (`scope=ACTIVE`) | ❌ no equivalent | TED: filters to active/open notices only |
+## Filter options
 
-> **BOAMP and countries:** BOAMP only covers France, so the `countries` field has no effect on BOAMP queries. Use `departments` to narrow by geography within France.
+| Field | What it does | TED | BOAMP |
+|---|---|---|---|
+| `keywords` | Search words, AND-joined | ✅ | ✅ |
+| `publicationDateFrom` | Only notices published on/after this date (`YYYY-MM-DD`) | ✅ | ✅ |
+| `countries` | Buyer country codes (ISO-3166 alpha-3) | ✅ | ❌ BOAMP is always France |
+| `departments` | French department numbers (e.g. `"75"`, `"92"`) | ❌ | ✅ |
+| `activeOnly` | Skip awarded/cancelled notices, show only open tenders | ✅ | ❌ no equivalent |
 
-### 4.3 Worked examples
+**Country codes for TED:** `FRA` France · `PRT` Portugal · `ESP` Spain · `DEU` Germany · `BEL` Belgium · `LUX` Luxembourg · `ITA` Italy · `NLD` Netherlands · and all other EU member states.
 
-**1. TED — IT services in France, from a date**
+---
+
+## Example queries
+
+### IT services across France, Portugal, and Spain
+
 ```yaml
 - source: TED
   filter:
     keywords: ["logiciel", "informatique"]
-    countries: [FRA]
+    countries: [FRA, PRT, ESP]
     publicationDateFrom: "2026-01-01"
     activeOnly: true
 ```
-Fetches active TED notices mentioning both "logiciel" and "informatique", published in France from 1 January 2026 onward.
 
----
+### French tenders in the Paris region
 
-**2. TED — Multiple countries**
-```yaml
-- source: TED
-  filter:
-    keywords: ["digitalisation"]
-    countries: [FRA, BEL, LUX]
-    publicationDateFrom: "2026-03-01"
-    activeOnly: true
-```
-Same keyword across the France/Belgium/Luxembourg corridor.
-
----
-
-**3. BOAMP — By department (Paris region)**
 ```yaml
 - source: BOAMP
   filter:
@@ -117,112 +120,107 @@ Same keyword across the France/Belgium/Luxembourg corridor.
     departments: ["75", "92", "93", "94"]
     publicationDateFrom: "2026-01-01"
 ```
-BOAMP notices in the Paris inner ring mentioning "logiciel" or "numérique".
 
----
+### TED — filter by CPV code (IT services, code 72000000)
 
-**4. TED with `rawQuery` — Filter by CPV code**
+The high-level `filter` doesn't cover CPV codes. Use `rawQuery` for that:
+
 ```yaml
 - source: TED
-  rawQuery: "buyer-country=FRA AND classification-cpv=72000000 AND publication-date>=20260101"
+  rawQuery: "buyer-country IN (FRA PRT ESP) AND classification-cpv=72000000 AND publication-date>=20260101"
 ```
-Use `rawQuery` when you need something the high-level `filter` can't express — here, filtering by CPV code 72000000 (IT services). When `rawQuery` is present, the `filter` block is ignored entirely.
 
-> Note: TED date format inside `rawQuery` is `YYYYMMDD` (no separators).
+When `rawQuery` is set, the `filter` block is ignored entirely. The query is sent verbatim to TED's Expert-Search engine.
 
----
+> TED date format inside `rawQuery` is `YYYYMMDD` with no separators (e.g. `20260101`, not `2026-01-01`).
 
-**5. BOAMP with `rawQuery`**
+### BOAMP — advanced ODSQL query
+
 ```yaml
 - source: BOAMP
   rawQuery: "search(objet,\"logiciel\") AND dateparution>=\"2026-01-01\""
 ```
-Full ODSQL expression sent directly to BOAMP's API. Useful for queries that combine text search with date ranges in ways the `filter` block doesn't expose.
-
-### 4.4 `rawQuery` reference
-
-These quick-reference tables cover the most common patterns. For the full query language, see the source's own documentation.
-
-**TED Expert-Search quick reference**
-
-| What | Syntax | Example |
-|---|---|---|
-| Full-text search | `FT ~ term` | `FT ~ logiciel` |
-| Buyer country | `buyer-country=XXX` | `buyer-country=FRA` |
-| Multiple countries | `buyer-country IN (A B C)` | `buyer-country IN (FRA LUX)` |
-| CPV code | `classification-cpv=XXXXXXXX` | `classification-cpv=72000000` |
-| Date from | `publication-date>=YYYYMMDD` | `publication-date>=20260101` |
-| Date range | `publication-date=(YYYYMMDD <> YYYYMMDD)` | `publication-date=(20260101 <> 20260601)` |
-| Combine | `AND`, `OR`, `NOT`, parentheses | `FT ~ logiciel AND buyer-country=FRA` |
-| Validate interactively | https://ted.europa.eu/en/expert-search | |
-
-> TED date format: `YYYYMMDD` with no separators (e.g. `20260101`, not `2026-01-01`).
-
-**BOAMP ODSQL quick reference**
-
-| What | Syntax | Example |
-|---|---|---|
-| Full-text on title | `search(objet,"term")` | `search(objet,"logiciel")` |
-| Date from | `dateparution>="YYYY-MM-DD"` | `dateparution>="2026-01-01"` |
-| By department | `code_departement=75` | `code_departement=75` |
-| Combine | `AND`, `OR` | `search(objet,"logiciel") AND code_departement=75` |
-
-> BOAMP date format: `"YYYY-MM-DD"` (ISO, quoted). Full fields reference: https://boamp-datadila.opendatasoft.com/explore/dataset/boamp/api/
 
 ---
 
-## 5. Output format
+## Reading the output CSV
 
-The output is a single CSV at the path you specify with `--procurement.output-csv` (or `OUTPUT_CSV=` with go-task). All sources are combined in one file.
-
-| Column | TED | BOAMP |
-|---|---|---|
-| `source` | `TED` | `BOAMP` |
-| `id` | Publication number (e.g. `123456-2026`) | `idweb` (e.g. `26-0001`) |
-| `title` | Notice title (French preferred) | `objet` |
-| `buyer` | Buyer name (French preferred) | `nomacheteur` |
-| `country` | Buyer country (e.g. `FRA`) | Always `FRA` |
-| `classification` | CPV codes joined (e.g. `72000000, 48000000`) | Descriptor labels joined |
-| `value` | Total procurement value (may be empty) | Always empty |
-| `publication_date` | Publication date | `dateparution` |
-| `deadline` | Deadline to submit tender | `datelimitereponse` (date part) |
-| `url` | Link to notice on TED | Link to BOAMP notice |
+| Column | What's in it |
+|---|---|
+| `source` | `TED` or `BOAMP` |
+| `id` | TED publication number (e.g. `123456-2026`) or BOAMP `idweb` (e.g. `26-0001`) |
+| `title` | Notice title (TED: French preferred; BOAMP: `objet`) |
+| `buyer` | Contracting authority name |
+| `country` | Buyer's country (BOAMP is always `FRA`) |
+| `classification` | CPV codes joined (TED) or French descriptor labels joined (BOAMP) |
+| `value` | Estimated contract value — often empty, especially on BOAMP |
+| `publication_date` | Date the notice was published |
+| `deadline` | Deadline to submit a tender — prioritise rows where this is not empty |
+| `url` | Direct link to the notice |
 
 ---
 
-## 6. Tuning & limits
+## rawQuery reference
 
-**Throttling:** by default, 500 ms between queries to avoid hammering either API. Override with:
+Use these when `filter` isn't enough.
+
+### TED Expert-Search
+
+| Want | Write |
+|---|---|
+| Keyword in notice text | `FT ~ logiciel` |
+| Single country | `buyer-country=FRA` |
+| Multiple countries | `buyer-country IN (FRA PRT ESP)` |
+| CPV sector | `classification-cpv=72000000` |
+| Published from a date | `publication-date>=20260101` |
+| Date range | `publication-date=(20260101 <> 20260601)` |
+| Combine | `FT ~ logiciel AND buyer-country=FRA AND publication-date>=20260101` |
+
+Validate your query interactively: https://ted.europa.eu/en/expert-search
+
+### BOAMP ODSQL
+
+| Want | Write |
+|---|---|
+| Keyword in tender object | `search(objet,"logiciel")` |
+| Published from a date | `dateparution>="2026-01-01"` |
+| Combine | `search(objet,"logiciel") AND dateparution>="2026-01-01"` |
+
+Dataset fields reference: https://boamp-datadila.opendatasoft.com/explore/dataset/boamp/api/
+
+---
+
+## Tuning
+
+**Slow it down** (if you're seeing rate-limit errors):
 ```
---procurement.throttle-millis=200
+--procurement.throttle-millis=1000
 ```
 
-**TED pagination:** cursor-based; will fetch all matching notices regardless of how many pages there are. No manual page size tuning needed.
+**Speed it up** (default is 500 ms between queries):
+```
+--procurement.throttle-millis=100
+```
 
-**BOAMP pagination:** capped at **10,000 results per query** (Opendatasoft platform limit). If your query hits the cap, you'll see a `boamp_results_truncated` warning in the logs. To work around it, split your query into shorter date ranges or add more specific keywords.
-
-**BOAMP rate limits:** the BOAMP API is public but has a daily request quota. For most use cases this is not an issue. If you're running high-volume queries, you can raise your quota by passing an API key:
+**BOAMP quota** — the public API has a daily request limit. For heavy use, get a free key at https://boamp-datadila.opendatasoft.com and pass it with:
 ```
 --boamp.api-key=YOUR_KEY
 ```
-Getting a key is free — register at https://boamp-datadila.opendatasoft.com.
 
-**Timeouts:** defaults are 10 s connect / 30 s per request. Override with:
+**Timeouts** (increase if you have a slow connection):
 ```
---ted.connect-timeout-seconds=10
---ted.request-timeout-seconds=30
---boamp.connect-timeout-seconds=10
---boamp.request-timeout-seconds=30
+--ted.request-timeout-seconds=60
+--boamp.request-timeout-seconds=60
 ```
 
 ---
 
-## 7. Limitations
+## Known limitations
 
-- **BASE/Portugal not yet supported.** There is no stable, unauthenticated public API for all-sector Portuguese open tenders. BASE integration is planned once the IMPIC OCDS API token is obtained.
+**BOAMP 10,000-result cap.** The Opendatasoft platform returns at most 10,000 rows per query. If your query matches more, you'll see a `boamp_results_truncated` warning in the logs. Fix: split the date range into shorter windows, or add more specific keywords.
 
-- **No cross-source deduplication.** EU above-threshold notices are published on both TED and BOAMP. If you query both sources with overlapping criteria, the same tender may appear twice in the output CSV. Check the `url` column to identify duplicates.
+**No deduplication across sources.** High-value French tenders above the EU threshold appear on both TED and BOAMP. If you query both with overlapping criteria, the same tender may appear twice. Use the `url` column to spot duplicates.
 
-- **CPV codes do not filter BOAMP.** TED organises notices by CPV code; BOAMP uses its own French descriptor taxonomy. There is no automatic mapping between the two. For sector-specific BOAMP searches, use `rawQuery` with `search(objet,"your term")` instead.
+**CPV codes don't work on BOAMP.** TED uses CPV codes; BOAMP uses French descriptors. They don't map automatically — use `rawQuery` with `search(objet,"your term")` for BOAMP sector searches.
 
-- **BOAMP cap at 10,000 results.** Queries returning more than 10,000 notices are silently truncated by the Opendatasoft platform. A `boamp_results_truncated` warning is logged, but the CSV will not contain the excess rows. Narrow your query if you see this warning.
+**BASE/Portugal not yet supported.** There is no stable unauthenticated public API for all-sector Portuguese open tenders. Below-threshold PT tenders aren't covered by TED either. BASE integration is planned once access to the IMPIC OCDS API is obtained.
