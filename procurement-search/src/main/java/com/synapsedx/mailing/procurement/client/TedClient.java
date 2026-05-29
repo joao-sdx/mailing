@@ -35,7 +35,7 @@ public class TedClient implements TenderSource {
           "classification-cpv",
           "total-value",
           "publication-date",
-          "deadline-receipt-tender",
+          "deadline-receipt-tender-date-lot",
           "links");
 
   private final TedProperties properties;
@@ -111,7 +111,7 @@ public class TedClient implements TenderSource {
     var classification = String.join(", ", cpvs);
     var value = notice.path("total-value").asText(null);
     var pubDate = parseDate(notice.path("publication-date").asText(null));
-    var deadline = parseDate(notice.path("deadline-receipt-tender").asText(null));
+    var deadline = parseDate(notice.path("deadline-receipt-tender-date-lot").asText(null));
     var linksNode = notice.path("links").path("html");
     var urlIt = linksNode.fields();
     var url = urlIt.hasNext() ? urlIt.next().getValue().asText(null) : null;
@@ -175,7 +175,8 @@ public class TedClient implements TenderSource {
     var response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
     log.debug("ted_post status={}", response.statusCode());
     if (response.statusCode() != 200) {
-      throw new IllegalStateException("TED API error status=" + response.statusCode());
+      throw new IllegalStateException(
+          "TED API error status=" + response.statusCode() + " body=" + response.body());
     }
     return response.body();
   }

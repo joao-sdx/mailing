@@ -9,7 +9,7 @@
       "classification-cpv": ["72000000"],
       "total-value": 500000,
       "publication-date": "2026-01-15",
-      "deadline-receipt-tender": "2026-02-28",
+      "deadline-receipt-tender-date-lot": "2026-02-28",
       "links": {"html": {"fra": "https://ted.europa.eu/notice/TED-001-2026"}}
     },
     {
@@ -20,7 +20,7 @@
       "classification-cpv": ["72200000", "72300000"],
       "total-value": null,
       "publication-date": "2026-01-16",
-      "deadline-receipt-tender": null,
+      "deadline-receipt-tender-date-lot": null,
       "links": {}
     }
   ],
