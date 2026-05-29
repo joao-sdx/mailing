@@ -1,0 +1,1 @@
+task run INPUT_CSV=/Users/joao.violante/IdeaProjects/mailing/sources/insee/echantillon.csv OUTPUT_YML=/Users/joao.violante/IdeaProjects/mailing/unitelegal2dataforseo/output/dataforseo-queries.yml

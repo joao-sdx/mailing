@@ -116,21 +116,32 @@ class CompanyDomainLookupJobIT {
                     .withBody(
                         "{\"choices\":[{\"message\":{\"content\":\"Résumé de l'article"
                             + " test\"}}]}")));
+    LMSTUDIO_MOCK.stubFor(
+        post(urlEqualTo("/v1/chat/completions"))
+            .withRequestBody(containing("digitalisation"))
+            .willReturn(
+                aResponse()
+                    .withStatus(200)
+                    .withHeader("Content-Type", "application/json")
+                    .withBody("{\"choices\":[{\"message\":{\"content\":\"true\"}}]}")));
 
     var execution = jobLauncherTestUtils.launchJob();
     assertThat(execution.getStatus().toString()).isEqualTo("COMPLETED");
 
     var lines = Files.readAllLines(OUTPUT_CSV);
     assertThat(lines).hasSize(6);
-    assertThat(lines.get(0)).isEqualTo("first_name,last_name,company,article_id,domain,summary");
+    assertThat(lines.get(0))
+        .isEqualTo("first_name,last_name,company,article_id,domain,summary,relevant");
     assertThat(lines.get(1))
-        .isEqualTo("Philippe,Mutin,Factofrance,r1.md,factofrance.com,Résumé de l'article test");
+        .isEqualTo(
+            "Philippe,Mutin,Factofrance,r1.md,factofrance.com,Résumé de l'article test,true");
     assertThat(lines.get(2))
-        .isEqualTo("Marc,Tyan,Factofrance,r2.md,factofrance.com,Résumé de l'article test");
-    assertThat(lines.get(3)).isEqualTo("Beñat,Cazanave,ARTZAINAK,r3.md,,Résumé de l'article test");
+        .isEqualTo("Marc,Tyan,Factofrance,r2.md,factofrance.com,Résumé de l'article test,true");
+    assertThat(lines.get(3))
+        .isEqualTo("Beñat,Cazanave,ARTZAINAK,r3.md,,Résumé de l'article test,true");
     assertThat(lines.get(4))
-        .isEqualTo("Isabelle,Gautier,Crédit Mutuel,r4.md,,Résumé de l'article test");
-    assertThat(lines.get(5)).isEqualTo("Jean,Test,,r5.md,,Résumé de l'article test");
+        .isEqualTo("Isabelle,Gautier,Crédit Mutuel,r4.md,,Résumé de l'article test,true");
+    assertThat(lines.get(5)).isEqualTo("Jean,Test,,r5.md,,Résumé de l'article test,true");
 
     LMSTUDIO_MOCK.verify(
         5,
@@ -140,6 +151,11 @@ class CompanyDomainLookupJobIT {
         5,
         postRequestedFor(urlEqualTo("/v1/chat/completions"))
             .withRequestBody(containing("30 mots"))
+            .withRequestBody(containing("\"max_tokens\":1024")));
+    LMSTUDIO_MOCK.verify(
+        5,
+        postRequestedFor(urlEqualTo("/v1/chat/completions"))
+            .withRequestBody(containing("digitalisation"))
             .withRequestBody(containing("\"max_tokens\":1024")));
   }
 }

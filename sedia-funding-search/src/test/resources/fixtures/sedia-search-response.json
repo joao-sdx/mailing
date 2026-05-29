@@ -1,0 +1,37 @@
+{
+  "totalResults": 2,
+  "pageNumber": 1,
+  "pageSize": 2,
+  "results": [
+    {
+      "reference": "HORIZON-EIC-2026-ACCELERATOR-01-01",
+      "url": "https://ec.europa.eu/info/funding-tenders/opportunities/portal/screen/opportunities/topic-details/HORIZON-EIC-2026-ACCELERATOR-01-01",
+      "title": "EIC Accelerator Open 2026",
+      "summary": "Support for deep tech startups with breakthrough innovations.",
+      "metadata": {
+        "identifier": ["HORIZON-EIC-2026-ACCELERATOR-01-01"],
+        "callIdentifier": ["HORIZON-EIC-2026-ACCELERATOR-01"],
+        "frameworkProgramme": ["Horizon Europe"],
+        "status": ["Open"],
+        "deadlineDate": ["2026-10-01T00:00:00.000+0000"],
+        "startDate": ["2026-01-15T00:00:00.000+0000"],
+        "budget": ["300000000"]
+      }
+    },
+    {
+      "reference": "DIGITAL-2024-CLOUD-AI-01-01",
+      "url": "https://ec.europa.eu/info/funding-tenders/opportunities/portal/screen/opportunities/topic-details/DIGITAL-2024-CLOUD-AI-01-01",
+      "title": "AI and Data Cloud for SMEs",
+      "summary": "Accelerating cloud and AI adoption for small and medium enterprises.",
+      "metadata": {
+        "identifier": ["DIGITAL-2024-CLOUD-AI-01-01"],
+        "callIdentifier": ["DIGITAL-2024-CLOUD-AI-01"],
+        "frameworkProgramme": ["Digital Europe"],
+        "status": ["Open"],
+        "deadlineDate": ["2026-09-15T00:00:00.000+0000"],
+        "startDate": ["2024-12-01T00:00:00.000+0000"],
+        "budget": ["50000000"]
+      }
+    }
+  ]
+}

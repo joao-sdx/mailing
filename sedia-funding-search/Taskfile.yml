@@ -1,0 +1,31 @@
+version: "3"
+
+vars:
+  MVN_EXEC: "../mvnw"
+
+tasks:
+  default:
+    desc: Run the sedia-funding-search pipeline (writes CSV to output/)
+    cmd: '{{.MVN_EXEC}} spring-boot:run'
+
+  run:
+    desc: "Run with custom output path; pass OUTPUT_CSV"
+    cmd: |
+      {{.MVN_EXEC}} spring-boot:run \
+        -Dspring-boot.run.arguments="--sedia.output-csv={{.OUTPUT_CSV}}"
+    requires:
+      vars: [OUTPUT_CSV]
+
+  build:
+    desc: Build the jar
+    cmd: "{{.MVN_EXEC}} package -DskipTests"
+
+  test:
+    desc: Run unit tests
+    cmd: "{{.MVN_EXEC}} test"
+
+  clean:
+    desc: Remove build artifacts and output files
+    cmds:
+      - "{{.MVN_EXEC}} clean"
+      - rm -rf output/

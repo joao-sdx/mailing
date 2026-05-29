@@ -20,7 +20,8 @@ public class ContactEnrichProcessor implements ItemProcessor<ContactRow, Enriche
   public EnrichedContactRow process(ContactRow row) {
     var key = row.company().trim().toUpperCase(Locale.ROOT);
     var domain = domainMap.get(key);
-    var summary = summaryMap.get(row.articleId());
-    return new EnrichedContactRow(row, domain, summary);
+    var summary = summaryMap.summary(row.articleId());
+    var relevant = summaryMap.relevant(row.articleId());
+    return new EnrichedContactRow(row, domain, summary, relevant);
   }
 }

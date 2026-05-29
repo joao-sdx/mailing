@@ -142,7 +142,8 @@ public class BoampClient implements TenderSource {
         null,
         pubDate,
         deadline,
-        url);
+        url,
+        "");
   }
 
   private LocalDate parseDate(String raw) {

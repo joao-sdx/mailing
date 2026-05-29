@@ -9,4 +9,5 @@ public record LmStudioProperties(
     String key,
     int connectTimeoutSeconds,
     int requestTimeoutSeconds,
-    int summaryMaxTokens) {}
+    int summaryMaxTokens,
+    int relevanceMaxTokens) {}

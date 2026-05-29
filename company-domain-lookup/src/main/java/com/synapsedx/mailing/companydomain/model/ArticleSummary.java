@@ -1,3 +1,3 @@
 package com.synapsedx.mailing.companydomain.model;
 
-public record ArticleSummary(String articleId, String summary) {}
+public record ArticleSummary(String articleId, String summary, String relevant) {}

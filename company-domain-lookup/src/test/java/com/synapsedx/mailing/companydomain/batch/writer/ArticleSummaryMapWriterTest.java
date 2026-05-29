@@ -17,10 +17,15 @@ class ArticleSummaryMapWriterTest {
 
     writer.write(
         new Chunk<>(
-            List.of(new ArticleSummary("r1.md", "Résumé un"), new ArticleSummary("r2.md", ""))));
+            List.of(
+                new ArticleSummary("r1.md", "Résumé un", "true"),
+                new ArticleSummary("r2.md", "", ""))));
 
-    assertThat(map.get("r1.md")).isEqualTo("Résumé un");
-    assertThat(map.get("r2.md")).isEqualTo("");
-    assertThat(map.get("absent.md")).isEqualTo("");
+    assertThat(map.summary("r1.md")).isEqualTo("Résumé un");
+    assertThat(map.relevant("r1.md")).isEqualTo("true");
+    assertThat(map.summary("r2.md")).isEqualTo("");
+    assertThat(map.relevant("r2.md")).isEqualTo("");
+    assertThat(map.summary("absent.md")).isEqualTo("");
+    assertThat(map.relevant("absent.md")).isEqualTo("");
   }
 }

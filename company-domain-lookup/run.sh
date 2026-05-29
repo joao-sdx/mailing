@@ -1,0 +1,1 @@
+task run INPUT_CSV=/Users/joao.violante/IdeaProjects/mailing/seo-news-parse/output/02/contacts-02.csv OUTPUT_CSV=output/contacts-with-domain.csv

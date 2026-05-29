@@ -28,8 +28,13 @@ public class ArticleSummaryProcessor implements ItemProcessor<String, ArticleSum
     log.info("article_summary_start article={}", articleId);
     var body = stripFrontmatter(readFile(path));
     var summary = lmStudioClient.summarizeArticle(body).orElse("");
-    log.info("article_summary_done article={} words={}", articleId, wordCount(summary));
-    return new ArticleSummary(articleId, summary);
+    var relevant = lmStudioClient.assessRelevance(body).map(Object::toString).orElse("");
+    log.info(
+        "article_summary_done article={} words={} relevant={}",
+        articleId,
+        wordCount(summary),
+        relevant);
+    return new ArticleSummary(articleId, summary, relevant);
   }
 
   private Path resolveArticlePath(String articleId) {

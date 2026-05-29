@@ -1,0 +1,26 @@
+spring:
+  config:
+    import: optional:file:.env[.properties]
+  batch:
+    job:
+      enabled: true
+    jdbc:
+      initialize-schema: always
+
+lmstudio:
+  server: http://127.0.0.1:1234
+  model: nvidia/nemotron-3-nano-4b
+  key: ${openai.key:lm-studio}
+  connect-timeout-seconds: 10
+  request-timeout-seconds: 60
+  relevance-max-tokens: 1024
+
+sedia:
+  search-endpoint: https://api.tech.ec.europa.eu/search-api/prod/rest/search
+  api-key: SEDIA
+  text: "***"
+  framework-programmes: [ "43108390", "43152860" ]
+  statuses: [ "31094502", "31094502" ]
+  types: [ "1" ]
+  page-size: 100
+  output-csv: output/sedia-calls.csv

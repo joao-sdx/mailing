@@ -1,0 +1,1 @@
+task run INPUT_YML=/Users/joao.violante/IdeaProjects/mailing/unitelegal2dataforseo/output/dataforseo-queries.yml OUTPUT_DIR=output/02

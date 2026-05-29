@@ -71,6 +71,9 @@ public class TedClient implements TenderSource {
       }
       var root = objectMapper.readTree(raw);
       var notices = root.path("notices");
+      if (!notices.isArray() || notices.isEmpty()) {
+        break;
+      }
       for (var notice : notices) {
         tenders.add(mapToTender(notice));
       }
@@ -129,7 +132,8 @@ public class TedClient implements TenderSource {
         value,
         pubDate,
         deadline,
-        url);
+        url,
+        "");
   }
 
   /** Returns the first non-null language value from a multilingual JsonNode map. */

@@ -19,6 +19,7 @@ lmstudio:
   connect-timeout-seconds: 10
   request-timeout-seconds: 60
   summary-max-tokens: 1024
+  relevance-max-tokens: 1024
 
 company-domain:
   input-csv: input/contacts.csv

@@ -18,7 +18,7 @@ Every module also ships a `Taskfile.yml` with a consistent shape — `build`, `t
 
 ## Multi-Module Layout
 
-Root `pom.xml` aggregates four modules: `mailing-pipeline`, `seo-news-search`, `seo-news-parse`, `unitelegal2dataforseo`. The on-disk `pipeline/` directory contains a child pom but **is not** in the root `<modules>` list — it builds standalone via its own Taskfile and is not part of `./mvnw install`.
+Root `pom.xml` aggregates: `mailing-pipeline`, `seo-news-search`, `seo-news-parse`, `unitelegal2dataforseo`, `company-domain-lookup`, `sedia-funding-search`. The on-disk `pipeline/` directory contains a child pom but **is not** in the root `<modules>` list — it builds standalone via its own Taskfile and is not part of `./mvnw install`.
 
 ## Architecture: File-Chained Batch Pipeline
 
@@ -35,6 +35,8 @@ unitelegal2dataforseo → seo-news-search → seo-news-parse
 - **`unitelegal2dataforseo`** — reads INSEE `StockUniteLegale` CSV, dedups company-name keywords (substring-aware), writes a DataForSEO query YAML. Defaults from `query-defaults.yml`; each emitted query gets a sequence-suffixed `file_prefix` so downstream filenames are unique.
 - **`seo-news-search`** — reads the query YAML (path overridable via `--seo-news.input-yml`), calls DataForSEO (throttled 2 req/s), writes one `*.md` per article with YAML frontmatter + body to `--seo-news.output-dir`.
 - **`seo-news-parse`** — reads a directory of `*.md` articles, sends each to a local LM Studio LLM, extracts contacts to a CSV. Paths overridable via `--seo-news-parse.input-dir` and `--seo-news-parse.output-csv`.
+- **`company-domain-lookup`** — reads a contacts CSV (header-driven), resolves each company's official domain via DataForSEO + LM Studio, then enriches every row with `domain`, `summary`, and `relevant` columns. Two-step job: deduplicate companies first, then enrich all rows. Output path via `--company-domain.output-csv`.
+- **`sedia-funding-search`** — fetches open EU funding calls/topics from the SEDIA Funding & Tenders Portal (Horizon Europe, EIC Accelerator, Digital Europe), scores each call for SME/digitalization relevance with LM Studio, writes a CSV of calls. Fully public API (`apiKey=SEDIA`, no registration). Output path via `--sedia.output-csv`. See `sedia-funding-search/README.md` for API details and rate-limit notes.
 - **`mailing-pipeline`** — separate Supabase-backed track. Multiple jobs live in one Spring Boot app; **select the job at runtime with `--spring.batch.job.name=<name>`** (`seo`, `seo-contact`, `enrich-companies`, `seo-identify-target`). The Taskfile shows one task per job.
 - **`pipeline/`** (orphan module) — INSEE master pipeline orchestrating four sub-jobs over `workdir/01-siren` → `02-siren-line` → `03-company` / `04-contact` / `05-relation` → `10-company-search-news` / `11-person-search-news` → `12-company-news`. Workdir stage numbering is sparse, not contiguous.
 

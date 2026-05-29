@@ -1,5 +1,6 @@
 package com.synapsedx.mailing.procurement.batch.processor;
 
+import com.synapsedx.mailing.procurement.client.LmStudioClient;
 import com.synapsedx.mailing.procurement.client.TenderSource;
 import com.synapsedx.mailing.procurement.config.ProcurementProperties;
 import com.synapsedx.mailing.procurement.model.ProcurementQuery;
@@ -21,6 +22,7 @@ public class TenderSearchProcessor implements ItemProcessor<ProcurementQuery, Li
 
   private final List<TenderSource> sources;
   private final ProcurementProperties properties;
+  private final LmStudioClient lmStudioClient;
 
   private Map<Source, TenderSource> sourceMap;
   private long throttleMillis;
@@ -41,8 +43,17 @@ public class TenderSearchProcessor implements ItemProcessor<ProcurementQuery, Li
         return null;
       }
       var tenders = source.search(query);
-      log.info("tender_search_done source={} count={}", query.source(), tenders.size());
-      return tenders.isEmpty() ? null : tenders;
+      if (tenders.isEmpty()) {
+        return null;
+      }
+      var scored = tenders.stream().map(this::score).toList();
+      var relevantCount = scored.stream().filter(t -> "true".equals(t.relevant())).count();
+      log.info(
+          "tender_search_done source={} count={} relevant={}",
+          query.source(),
+          scored.size(),
+          relevantCount);
+      return scored;
     } catch (Exception e) {
       log.error("tender_search_failed source={}", query.source(), e);
       return null;
@@ -51,6 +62,22 @@ public class TenderSearchProcessor implements ItemProcessor<ProcurementQuery, Li
 
   void setThrottleMillis(long ms) {
     this.throttleMillis = ms;
+  }
+
+  private Tender score(Tender tender) {
+    var relevant = lmStudioClient.assessPostmasterFit(tender).map(Object::toString).orElse("");
+    return new Tender(
+        tender.source(),
+        tender.id(),
+        tender.title(),
+        tender.buyer(),
+        tender.country(),
+        tender.classification(),
+        tender.value(),
+        tender.publicationDate(),
+        tender.deadline(),
+        tender.url(),
+        relevant);
   }
 
   private void throttle() {

@@ -21,3 +21,11 @@ boamp:
   records-endpoint: https://boamp-datadila.opendatasoft.com/api/explore/v2.1/catalog/datasets/boamp/records
   connect-timeout-seconds: 10
   request-timeout-seconds: 30
+
+lmstudio:
+  server: http://127.0.0.1:1234
+  model: nvidia/nemotron-3-nano-4b
+  key: ${openai.key:lm-studio}
+  connect-timeout-seconds: 10
+  request-timeout-seconds: 60
+  max-tokens: 1024

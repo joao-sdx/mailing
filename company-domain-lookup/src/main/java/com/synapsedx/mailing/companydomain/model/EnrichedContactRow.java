@@ -1,3 +1,4 @@
 package com.synapsedx.mailing.companydomain.model;
 
-public record EnrichedContactRow(ContactRow contact, String domain, String summary) {}
+public record EnrichedContactRow(
+    ContactRow contact, String domain, String summary, String relevant) {}

@@ -44,7 +44,8 @@ class TenderCsvWriterTest {
             "500000",
             LocalDate.of(2025, 1, 10),
             LocalDate.of(2025, 3, 1),
-            "https://ted.europa.eu/1");
+            "https://ted.europa.eu/1",
+            "true");
     var t2 =
         tender(
             "BOAMP",
@@ -56,7 +57,8 @@ class TenderCsvWriterTest {
             "",
             LocalDate.of(2025, 1, 15),
             null,
-            "https://boamp.fr/2");
+            "https://boamp.fr/2",
+            "false");
 
     writer.write(new Chunk<>(List.of(List.of(t1, t2))));
 
@@ -64,9 +66,11 @@ class TenderCsvWriterTest {
     assertThat(lines).hasSize(3);
     assertThat(lines.getFirst())
         .isEqualTo(
-            "source,id,title,buyer,country,classification,value,publication_date,deadline,url");
+            "source,id,title,buyer,country,classification,value,publication_date,deadline,url,relevant");
     assertThat(lines.get(1)).startsWith("TED,T-001,Road construction,Ministry,FRA");
+    assertThat(lines.get(1)).endsWith(",true");
     assertThat(lines.get(2)).startsWith("BOAMP,B-002,IT services,Prefecture,FRA");
+    assertThat(lines.get(2)).endsWith(",false");
   }
 
   @Test
@@ -82,7 +86,8 @@ class TenderCsvWriterTest {
             "",
             LocalDate.of(2025, 1, 1),
             null,
-            "https://ted.europa.eu/1");
+            "https://ted.europa.eu/1",
+            "");
 
     writer.write(new Chunk<>(List.of(List.of(t))));
 
@@ -104,7 +109,8 @@ class TenderCsvWriterTest {
             "",
             LocalDate.of(2025, 1, 1),
             null,
-            "https://ted.europa.eu/1");
+            "https://ted.europa.eu/1",
+            "true");
     var t2 =
         tender(
             "BOAMP",
@@ -116,7 +122,8 @@ class TenderCsvWriterTest {
             "",
             LocalDate.of(2025, 2, 1),
             null,
-            "https://boamp.fr/2");
+            "https://boamp.fr/2",
+            "false");
 
     writer.write(new Chunk<>(List.of(List.of(t1))));
     writer.write(new Chunk<>(List.of(List.of(t2))));
@@ -125,13 +132,14 @@ class TenderCsvWriterTest {
     // Header written once + 2 data rows
     assertThat(lines).hasSize(3);
     assertThat(lines.getFirst()).startsWith("source,id");
+    assertThat(lines.getFirst()).endsWith(",relevant");
     assertThat(lines.get(1)).contains("T-001");
     assertThat(lines.get(2)).contains("B-002");
   }
 
   @Test
   void handlesNullFieldsGracefully() throws Exception {
-    var t = new Tender("TED", "T-001", null, null, "FRA", null, null, null, null, null);
+    var t = new Tender("TED", "T-001", null, null, "FRA", null, null, null, null, null, null);
 
     writer.write(new Chunk<>(List.of(List.of(t))));
 
@@ -152,8 +160,19 @@ class TenderCsvWriterTest {
       String value,
       LocalDate publicationDate,
       LocalDate deadline,
-      String url) {
+      String url,
+      String relevant) {
     return new Tender(
-        source, id, title, buyer, country, classification, value, publicationDate, deadline, url);
+        source,
+        id,
+        title,
+        buyer,
+        country,
+        classification,
+        value,
+        publicationDate,
+        deadline,
+        url,
+        relevant);
   }
 }

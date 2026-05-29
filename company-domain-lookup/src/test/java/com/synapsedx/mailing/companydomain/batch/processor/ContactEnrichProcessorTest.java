@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.synapsedx.mailing.companydomain.batch.support.ArticleSummaryMap;
 import com.synapsedx.mailing.companydomain.batch.support.CompanyDomainMap;
+import com.synapsedx.mailing.companydomain.model.ArticleSummary;
 import com.synapsedx.mailing.companydomain.model.ContactRow;
 import java.util.List;
 import org.junit.jupiter.api.Test;
@@ -15,7 +16,7 @@ class ContactEnrichProcessorTest {
     var domainMap = new CompanyDomainMap();
     domainMap.put("FACTOFRANCE", "factofrance.com");
     var summaryMap = new ArticleSummaryMap();
-    summaryMap.put("r.md", "Résumé de l'article.");
+    summaryMap.put(new ArticleSummary("r.md", "Résumé de l'article.", "true"));
     var processor = new ContactEnrichProcessor(domainMap, summaryMap);
 
     var row =
@@ -30,6 +31,7 @@ class ContactEnrichProcessorTest {
     assertThat(enriched.contact()).isSameAs(row);
     assertThat(enriched.domain()).isEqualTo("factofrance.com");
     assertThat(enriched.summary()).isEqualTo("Résumé de l'article.");
+    assertThat(enriched.relevant()).isEqualTo("true");
   }
 
   @Test
@@ -45,5 +47,6 @@ class ContactEnrichProcessorTest {
     var enriched = processor.process(row);
     assertThat(enriched.domain()).isEqualTo("");
     assertThat(enriched.summary()).isEqualTo("");
+    assertThat(enriched.relevant()).isEqualTo("");
   }
 }

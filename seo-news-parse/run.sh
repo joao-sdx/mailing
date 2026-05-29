@@ -1,0 +1,1 @@
+task run INPUT_DIR=/Users/joao.violante/IdeaProjects/mailing/seo-news-search/output/02 OUTPUT_CSV=output/02/contacts-02.csv

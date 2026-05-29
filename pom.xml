@@ -12,6 +12,7 @@
         <module>unitelegal2dataforseo</module>
         <module>company-domain-lookup</module>
         <module>procurement-search</module>
+        <module>sedia-funding-search</module>
     </modules>
 
 

@@ -20,7 +20,7 @@ import org.springframework.stereotype.Component;
 public class TenderCsvWriter implements ItemWriter<List<Tender>>, StepExecutionListener {
 
   private static final String HEADER =
-      "source,id,title,buyer,country,classification,value,publication_date,deadline,url";
+      "source,id,title,buyer,country,classification,value,publication_date,deadline,url,relevant";
 
   private final ProcurementProperties properties;
   private boolean headerWritten = false;
@@ -61,7 +61,8 @@ public class TenderCsvWriter implements ItemWriter<List<Tender>>, StepExecutionL
         sb.append(tender.publicationDate() != null ? tender.publicationDate().toString() : "")
             .append(",");
         sb.append(tender.deadline() != null ? tender.deadline().toString() : "").append(",");
-        sb.append(escapeCsv(tender.url())).append("\n");
+        sb.append(escapeCsv(tender.url())).append(",");
+        sb.append(escapeCsv(tender.relevant())).append("\n");
       }
     }
     Files.writeString(csvPath, sb.toString(), StandardOpenOption.APPEND);

@@ -41,7 +41,7 @@ public class EnrichedContactsCsvWriter
 
     if (!headerWritten) {
       var headers = chunk.getItems().iterator().next().contact().headers();
-      var headerLine = String.join(",", headers) + ",domain,summary\n";
+      var headerLine = String.join(",", headers) + ",domain,summary,relevant\n";
       Files.writeString(
           csvPath, headerLine, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
       headerWritten = true;
@@ -58,7 +58,8 @@ public class EnrichedContactsCsvWriter
         first = false;
       }
       sb.append(",").append(escapeCsv(row.domain()));
-      sb.append(",").append(escapeCsv(row.summary())).append("\n");
+      sb.append(",").append(escapeCsv(row.summary()));
+      sb.append(",").append(escapeCsv(row.relevant())).append("\n");
     }
     Files.writeString(csvPath, sb.toString(), StandardOpenOption.APPEND);
     log.info("enriched_csv_written file={} rows={}", csvPath.getFileName(), chunk.size());

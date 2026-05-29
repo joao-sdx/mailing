@@ -13,4 +13,5 @@ public record Tender(
     String value, // total-value (TED); typically empty for BOAMP
     LocalDate publicationDate,
     LocalDate deadline, // deadline-receipt-tender (TED); datelimitereponse (BOAMP)
-    String url) {}
+    String url,
+    String relevant) {} // "true", "false", or "" when LLM gave no usable verdict

@@ -16,7 +16,7 @@ public class ArticleSummaryMapWriter implements ItemWriter<ArticleSummary> {
   @Override
   public void write(Chunk<? extends ArticleSummary> chunk) {
     for (var item : chunk.getItems()) {
-      map.put(item.articleId(), item.summary());
+      map.put(item);
     }
   }
 }

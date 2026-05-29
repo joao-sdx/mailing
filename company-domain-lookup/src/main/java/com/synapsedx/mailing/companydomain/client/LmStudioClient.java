@@ -28,6 +28,7 @@ public class LmStudioClient {
   private HttpClient httpClient;
   private String promptTemplate;
   private String summaryPromptTemplate;
+  private String relevancePromptTemplate;
 
   @PostConstruct
   void init() throws Exception {
@@ -40,6 +41,9 @@ public class LmStudioClient {
         new ClassPathResource("domain-pick-prompt.md").getContentAsString(StandardCharsets.UTF_8);
     summaryPromptTemplate =
         new ClassPathResource("article-summary-prompt.md")
+            .getContentAsString(StandardCharsets.UTF_8);
+    relevancePromptTemplate =
+        new ClassPathResource("article-relevance-prompt.md")
             .getContentAsString(StandardCharsets.UTF_8);
   }
 
@@ -111,6 +115,51 @@ public class LmStudioClient {
       return content.isBlank() ? Optional.empty() : Optional.of(content);
     } catch (Exception e) {
       log.warn("article_summary_failed reason={}", e.getMessage());
+      return Optional.empty();
+    }
+  }
+
+  public Optional<Boolean> assessRelevance(String articleBody) {
+    try {
+      var rendered = relevancePromptTemplate.replace("{{article}}", articleBody);
+
+      var messages = mapper.createArrayNode();
+      messages.add(mapper.createObjectNode().put("role", "user").put("content", rendered));
+
+      var requestNode = mapper.createObjectNode();
+      requestNode.put("model", properties.model());
+      requestNode.set("messages", messages);
+      requestNode.put("temperature", 0);
+      requestNode.put("max_tokens", properties.relevanceMaxTokens());
+
+      var rawResponse = post(mapper.writeValueAsString(requestNode));
+      var content =
+          mapper
+              .readTree(rawResponse)
+              .path("choices")
+              .path(0)
+              .path("message")
+              .path("content")
+              .asText("");
+      content = content.replaceAll("(?s)```json\\s*", "").replaceAll("(?s)```\\s*", "").strip();
+      if (content.isBlank()) {
+        log.warn("article_relevance_empty");
+        return Optional.empty();
+      }
+      var lower = content.toLowerCase(java.util.Locale.ROOT);
+      if (lower.equals("true") || lower.equals("false")) {
+        return Optional.of(Boolean.parseBoolean(lower));
+      }
+      if (lower.contains("true")) {
+        return Optional.of(true);
+      }
+      if (lower.contains("false")) {
+        return Optional.of(false);
+      }
+      log.warn("article_relevance_unparseable response={}", content);
+      return Optional.empty();
+    } catch (Exception e) {
+      log.warn("article_relevance_failed reason={}", e.getMessage());
       return Optional.empty();
     }
   }

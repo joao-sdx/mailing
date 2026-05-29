@@ -28,6 +28,7 @@ class ArticleSummaryProcessorTest {
         dir.resolve("a.md"), "---\ntitle: T\nurl: http://x\n---\nCorps réel de l'article.\n");
     var llm = mock(LmStudioClient.class);
     when(llm.summarizeArticle(anyString())).thenReturn(Optional.of("Un résumé."));
+    when(llm.assessRelevance(anyString())).thenReturn(Optional.of(true));
     var processor = new ArticleSummaryProcessor(propsForDir(dir), llm);
 
     var result = processor.process("a.md");
@@ -44,6 +45,7 @@ class ArticleSummaryProcessorTest {
     Files.writeString(dir.resolve("b.md"), "Pas de frontmatter ici.");
     var llm = mock(LmStudioClient.class);
     when(llm.summarizeArticle(anyString())).thenReturn(Optional.of("ok"));
+    when(llm.assessRelevance(anyString())).thenReturn(Optional.of(false));
     var processor = new ArticleSummaryProcessor(propsForDir(dir), llm);
 
     processor.process("b.md");
@@ -68,6 +70,7 @@ class ArticleSummaryProcessorTest {
     Files.writeString(dir.resolve("c.md"), "Contenu.");
     var llm = mock(LmStudioClient.class);
     when(llm.summarizeArticle(anyString())).thenReturn(Optional.empty());
+    when(llm.assessRelevance(anyString())).thenReturn(Optional.empty());
     var processor = new ArticleSummaryProcessor(propsForDir(dir), llm);
 
     assertThat(processor.process("c.md").summary()).isEqualTo("");
@@ -79,8 +82,42 @@ class ArticleSummaryProcessorTest {
     var longSummary = "mot ".repeat(50).trim(); // 50 words, well over 30
     var llm = mock(LmStudioClient.class);
     when(llm.summarizeArticle(anyString())).thenReturn(Optional.of(longSummary));
+    when(llm.assessRelevance(anyString())).thenReturn(Optional.of(true));
     var processor = new ArticleSummaryProcessor(propsForDir(dir), llm);
 
     assertThat(processor.process("d.md").summary()).isEqualTo(longSummary);
+  }
+
+  @Test
+  void relevantTrueWhenLlmReturnsTrue(@TempDir Path dir) throws Exception {
+    Files.writeString(dir.resolve("e.md"), "Article sur la digitalisation.");
+    var llm = mock(LmStudioClient.class);
+    when(llm.summarizeArticle(anyString())).thenReturn(Optional.of("Résumé."));
+    when(llm.assessRelevance(anyString())).thenReturn(Optional.of(true));
+    var processor = new ArticleSummaryProcessor(propsForDir(dir), llm);
+
+    assertThat(processor.process("e.md").relevant()).isEqualTo("true");
+  }
+
+  @Test
+  void relevantFalseWhenLlmReturnsFalse(@TempDir Path dir) throws Exception {
+    Files.writeString(dir.resolve("f.md"), "Article hors sujet.");
+    var llm = mock(LmStudioClient.class);
+    when(llm.summarizeArticle(anyString())).thenReturn(Optional.of("Résumé."));
+    when(llm.assessRelevance(anyString())).thenReturn(Optional.of(false));
+    var processor = new ArticleSummaryProcessor(propsForDir(dir), llm);
+
+    assertThat(processor.process("f.md").relevant()).isEqualTo("false");
+  }
+
+  @Test
+  void relevantEmptyWhenLlmRelevanceFails(@TempDir Path dir) throws Exception {
+    Files.writeString(dir.resolve("g.md"), "Contenu.");
+    var llm = mock(LmStudioClient.class);
+    when(llm.summarizeArticle(anyString())).thenReturn(Optional.of("Résumé."));
+    when(llm.assessRelevance(anyString())).thenReturn(Optional.empty());
+    var processor = new ArticleSummaryProcessor(propsForDir(dir), llm);
+
+    assertThat(processor.process("g.md").relevant()).isEqualTo("");
   }
 }

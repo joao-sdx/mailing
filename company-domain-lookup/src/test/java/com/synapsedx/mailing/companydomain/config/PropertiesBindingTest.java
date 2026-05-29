@@ -18,6 +18,7 @@ import org.springframework.test.context.TestPropertySource;
       "lmstudio.connect-timeout-seconds=5",
       "lmstudio.request-timeout-seconds=15",
       "lmstudio.summary-max-tokens=777",
+      "lmstudio.relevance-max-tokens=888",
       "company-domain.input-csv=in.csv",
       "company-domain.output-csv=out.csv",
       "company-domain.articles-dir=/tmp/articles",
@@ -41,6 +42,7 @@ class PropertiesBindingTest {
     assertThat(lmstudio.connectTimeoutSeconds()).isEqualTo(5);
     assertThat(lmstudio.requestTimeoutSeconds()).isEqualTo(15);
     assertThat(lmstudio.summaryMaxTokens()).isEqualTo(777);
+    assertThat(lmstudio.relevanceMaxTokens()).isEqualTo(888);
     assertThat(companyDomain.inputCsv()).isEqualTo("in.csv");
     assertThat(companyDomain.outputCsv()).isEqualTo("out.csv");
     assertThat(companyDomain.articlesDir()).isEqualTo("/tmp/articles");
