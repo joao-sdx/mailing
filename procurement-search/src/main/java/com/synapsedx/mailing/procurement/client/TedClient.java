@@ -65,6 +65,10 @@ public class TedClient implements TenderSource {
     do {
       var body = buildRequestBody(queryString, nextToken);
       var raw = post(body);
+      if (raw == null) {
+        log.warn("ted_rate_limited_stopping total_so_far={}", tenders.size());
+        break;
+      }
       var root = objectMapper.readTree(raw);
       var notices = root.path("notices");
       for (var notice : notices) {
@@ -151,11 +155,16 @@ public class TedClient implements TenderSource {
       return null;
     }
     try {
+      // YYYYMMDD (no separators)
       if (raw.length() == 8 && !raw.contains("-")) {
         return LocalDate.of(
             Integer.parseInt(raw.substring(0, 4)),
             Integer.parseInt(raw.substring(4, 6)),
             Integer.parseInt(raw.substring(6, 8)));
+      }
+      // YYYY-MM-DD+HH:MM or YYYY-MM-DD-HH:MM (date with timezone offset, no time component)
+      if (raw.length() > 10 && (raw.charAt(10) == '+' || raw.charAt(10) == '-')) {
+        return LocalDate.parse(raw.substring(0, 10));
       }
       return LocalDate.parse(raw);
     } catch (DateTimeParseException | NumberFormatException e) {
@@ -174,6 +183,10 @@ public class TedClient implements TenderSource {
             .build();
     var response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
     log.debug("ted_post status={}", response.statusCode());
+    if (response.statusCode() == 429) {
+      log.warn("ted_rate_limited");
+      return null;
+    }
     if (response.statusCode() != 200) {
       throw new IllegalStateException(
           "TED API error status=" + response.statusCode() + " body=" + response.body());
