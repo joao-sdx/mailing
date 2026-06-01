@@ -8,6 +8,7 @@ import com.synapsedx.mailing.companydomain.model.EnrichedContactRow;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.springframework.batch.core.StepExecution;
@@ -18,7 +19,14 @@ class EnrichedContactsCsvWriterTest {
   @Test
   void writesHeaderOnceAcrossChunksAndAppendsDomain(@TempDir Path tmp) throws Exception {
     var out = tmp.resolve("out.csv");
-    var props = new CompanyDomainProperties("ignored", out.toString(), "", 10, 5);
+    var props =
+        new CompanyDomainProperties(
+            "ignored",
+            out.toString(),
+            "",
+            10,
+            5,
+            Map.of("company", "company", "article_id", "article_id"));
     var writer = new EnrichedContactsCsvWriter(props);
     writer.beforeStep(new StepExecution("step", null));
 

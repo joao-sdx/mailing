@@ -6,6 +6,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import com.synapsedx.mailing.companydomain.config.CompanyDomainProperties;
 import com.synapsedx.mailing.companydomain.model.ContactRow;
 import java.util.ArrayList;
+import java.util.Map;
 import org.junit.jupiter.api.Test;
 
 class ContactsCsvReaderTest {
@@ -14,7 +15,12 @@ class ContactsCsvReaderTest {
   void emitsEveryRowWithHeadersAndCompany() throws Exception {
     var props =
         new CompanyDomainProperties(
-            "src/test/resources/fixtures/contacts-sample.csv", "out.csv", "", 10, 5);
+            "src/test/resources/fixtures/contacts-sample.csv",
+            "out.csv",
+            "",
+            10,
+            5,
+            Map.of("company", "company", "article_id", "article_id"));
     var reader = new ContactsCsvReader(props);
 
     var all = new ArrayList<ContactRow>();
@@ -38,7 +44,12 @@ class ContactsCsvReaderTest {
   void failsFastWhenArticleIdColumnMissing() {
     var props =
         new CompanyDomainProperties(
-            "src/test/resources/fixtures/no-article-id-header.csv", "out.csv", "", 10, 5);
+            "src/test/resources/fixtures/no-article-id-header.csv",
+            "out.csv",
+            "",
+            10,
+            5,
+            Map.of("company", "company", "article_id", "article_id"));
     var reader = new ContactsCsvReader(props);
     assertThatThrownBy(reader::read)
         .isInstanceOf(IllegalStateException.class)

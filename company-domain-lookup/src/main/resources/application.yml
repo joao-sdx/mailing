@@ -27,3 +27,6 @@ company-domain:
   articles-dir: ""
   serp-depth: 10
   serp-top-n: 5
+  column-mapping:
+    company: company
+    article_id: article_id

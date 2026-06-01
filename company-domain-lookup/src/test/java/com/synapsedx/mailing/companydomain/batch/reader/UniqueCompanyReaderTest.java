@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.synapsedx.mailing.companydomain.config.CompanyDomainProperties;
 import java.util.ArrayList;
+import java.util.Map;
 import org.junit.jupiter.api.Test;
 
 class UniqueCompanyReaderTest {
@@ -13,7 +14,12 @@ class UniqueCompanyReaderTest {
   void emitsUniqueCompaniesPreservingFirstSeenOrder() throws Exception {
     var props =
         new CompanyDomainProperties(
-            "src/test/resources/fixtures/contacts-sample.csv", "out.csv", "", 10, 5);
+            "src/test/resources/fixtures/contacts-sample.csv",
+            "out.csv",
+            "",
+            10,
+            5,
+            Map.of("company", "company", "article_id", "article_id"));
     var reader = new UniqueCompanyReader(props);
 
     var seen = new ArrayList<String>();
@@ -29,7 +35,12 @@ class UniqueCompanyReaderTest {
   void failsFastWhenCompanyColumnMissing() {
     var props =
         new CompanyDomainProperties(
-            "src/test/resources/fixtures/no-company-header.csv", "out.csv", "", 10, 5);
+            "src/test/resources/fixtures/no-company-header.csv",
+            "out.csv",
+            "",
+            10,
+            5,
+            Map.of("company", "company", "article_id", "article_id"));
     var reader = new UniqueCompanyReader(props);
     assertThatThrownBy(reader::read)
         .isInstanceOf(IllegalStateException.class)

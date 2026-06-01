@@ -10,6 +10,7 @@ import com.synapsedx.mailing.companydomain.client.LmStudioClient;
 import com.synapsedx.mailing.companydomain.config.CompanyDomainProperties;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Map;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -19,7 +20,13 @@ import org.mockito.Mockito;
 class ArticleSummaryProcessorTest {
 
   private CompanyDomainProperties propsForDir(Path dir) {
-    return new CompanyDomainProperties("ignored.csv", "out.csv", dir.toString(), 10, 5);
+    return new CompanyDomainProperties(
+        "ignored.csv",
+        "out.csv",
+        dir.toString(),
+        10,
+        5,
+        Map.of("company", "company", "article_id", "article_id"));
   }
 
   @Test
