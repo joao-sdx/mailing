@@ -94,7 +94,7 @@ class UniqueDomainReaderTest {
     reader.beforeStep(null);
 
     assertThatThrownBy(reader::read)
-        .isInstanceOf(IllegalStateException.class)
+        .isInstanceOf(IllegalArgumentException.class)
         .hasMessageContaining("domain");
   }
 
