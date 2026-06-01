@@ -52,7 +52,7 @@ class ContactsCsvReaderTest {
             Map.of("company", "company", "article_id", "article_id"));
     var reader = new ContactsCsvReader(props);
     assertThatThrownBy(reader::read)
-        .isInstanceOf(IllegalStateException.class)
+        .isInstanceOf(IllegalArgumentException.class)
         .hasMessageContaining("article_id");
   }
 }

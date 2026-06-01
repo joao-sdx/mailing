@@ -1,6 +1,7 @@
 package com.synapsedx.mailing.companydomain.batch.reader;
 
 import com.synapsedx.mailing.companydomain.config.CompanyDomainProperties;
+import com.synapsedx.mailing.companydomain.csv.CsvColumnMapper;
 import com.synapsedx.mailing.companydomain.csv.CsvLineParser;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -37,11 +38,7 @@ public class UniqueCompanyReader implements ItemReader<String> {
       throw new IllegalStateException("input CSV is empty: " + path);
     }
     var headers = CsvLineParser.parse(lines.getFirst());
-    var companyIdx = headers.indexOf("company");
-    if (companyIdx < 0) {
-      throw new IllegalStateException(
-          "input CSV missing 'company' column; headers=" + headers + " file=" + path);
-    }
+    var companyIdx = CsvColumnMapper.resolve(headers, properties.columnMapping()).get("company");
 
     var unique = new ArrayList<String>();
     var seenKeys = new HashSet<String>();

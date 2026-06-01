@@ -43,7 +43,7 @@ class UniqueCompanyReaderTest {
             Map.of("company", "company", "article_id", "article_id"));
     var reader = new UniqueCompanyReader(props);
     assertThatThrownBy(reader::read)
-        .isInstanceOf(IllegalStateException.class)
+        .isInstanceOf(IllegalArgumentException.class)
         .hasMessageContaining("company");
   }
 }

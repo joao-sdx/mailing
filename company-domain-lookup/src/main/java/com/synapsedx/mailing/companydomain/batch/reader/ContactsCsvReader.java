@@ -1,12 +1,14 @@
 package com.synapsedx.mailing.companydomain.batch.reader;
 
 import com.synapsedx.mailing.companydomain.config.CompanyDomainProperties;
+import com.synapsedx.mailing.companydomain.csv.CsvColumnMapper;
 import com.synapsedx.mailing.companydomain.csv.CsvLineParser;
 import com.synapsedx.mailing.companydomain.model.ContactRow;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.item.ItemReader;
@@ -19,8 +21,7 @@ public class ContactsCsvReader implements ItemReader<ContactRow> {
 
   private final CompanyDomainProperties properties;
   private List<String> headers;
-  private int companyIdx = -1;
-  private int articleIdIdx = -1;
+  private Map<String, Integer> columnIndices;
   private Iterator<String> dataLines;
 
   @Override
@@ -32,10 +33,10 @@ public class ContactsCsvReader implements ItemReader<ContactRow> {
       return null;
     }
     var fields = CsvLineParser.parse(dataLines.next());
-    var company =
-        companyIdx >= 0 && companyIdx < fields.size() ? fields.get(companyIdx).trim() : "";
-    var articleId =
-        articleIdIdx >= 0 && articleIdIdx < fields.size() ? fields.get(articleIdIdx).trim() : "";
+    var companyIdx = columnIndices.get("company");
+    var articleIdIdx = columnIndices.get("article_id");
+    var company = companyIdx < fields.size() ? fields.get(companyIdx).trim() : "";
+    var articleId = articleIdIdx < fields.size() ? fields.get(articleIdIdx).trim() : "";
     return new ContactRow(headers, fields, company, articleId);
   }
 
@@ -46,16 +47,7 @@ public class ContactsCsvReader implements ItemReader<ContactRow> {
       throw new IllegalStateException("input CSV is empty: " + path);
     }
     headers = CsvLineParser.parse(lines.getFirst());
-    companyIdx = headers.indexOf("company");
-    if (companyIdx < 0) {
-      throw new IllegalStateException(
-          "input CSV missing 'company' column; headers=" + headers + " file=" + path);
-    }
-    articleIdIdx = headers.indexOf("article_id");
-    if (articleIdIdx < 0) {
-      throw new IllegalStateException(
-          "input CSV missing 'article_id' column; headers=" + headers + " file=" + path);
-    }
+    columnIndices = CsvColumnMapper.resolve(headers, properties.columnMapping());
     dataLines = lines.subList(1, lines.size()).iterator();
     log.info(
         "contacts_csv_loaded file={} headers={} rows={}",
