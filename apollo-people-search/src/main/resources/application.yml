@@ -1,0 +1,36 @@
+spring:
+  config:
+    import: optional:file:.env[.properties]
+  batch:
+    job:
+      enabled: true
+    jdbc:
+      initialize-schema: always
+
+apollo:
+  api:
+    key: ${apollo.api.key}
+  people-search-endpoint: https://api.apollo.io/api/v1/mixed_people/api_search
+  input-csv: input/contacts-with-domain.csv
+  output-csv: output/apollo-people.csv
+  per-page: 25
+  top-n: 10
+  throttle-millis: 500
+  seniorities:
+    - owner
+    - founder
+    - c_suite
+    - vp
+    - head
+    - director
+  # titles: optional — narrows to specific job titles (Apollo ANDs with seniorities)
+  titles:
+    - CTO
+    - Chief Technology Officer
+    - Chief Digital Officer
+    - Chief Information Officer
+    - VP Engineering
+    - VP Technology
+  column-mapping:
+    company: company
+    domain: domain
