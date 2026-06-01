@@ -38,7 +38,11 @@ public class UniqueCompanyReader implements ItemReader<String> {
       throw new IllegalStateException("input CSV is empty: " + path);
     }
     var headers = CsvLineParser.parse(lines.getFirst());
-    var companyIdx = CsvColumnMapper.resolve(headers, properties.columnMapping()).get("company");
+    var resolved = CsvColumnMapper.resolve(headers, properties.columnMapping());
+    var companyIdx = resolved.get("company");
+    if (companyIdx == null) {
+      throw new IllegalStateException("column-mapping must include key 'company'");
+    }
 
     var unique = new ArrayList<String>();
     var seenKeys = new HashSet<String>();

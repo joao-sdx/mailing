@@ -37,7 +37,11 @@ public class UniqueArticleReader implements ItemReader<String> {
       throw new IllegalStateException("input CSV is empty: " + path);
     }
     var headers = CsvLineParser.parse(lines.getFirst());
-    var articleIdx = CsvColumnMapper.resolve(headers, properties.columnMapping()).get("article_id");
+    var resolved = CsvColumnMapper.resolve(headers, properties.columnMapping());
+    var articleIdx = resolved.get("article_id");
+    if (articleIdx == null) {
+      throw new IllegalStateException("column-mapping must include key 'article_id'");
+    }
 
     var unique = new ArrayList<String>();
     var seen = new HashSet<String>();
