@@ -37,7 +37,7 @@ class FundingCallsCsvWriterTest {
     writer.beforeStep(null);
   }
 
-  private ScoredCall scored(String id, String title, String relevant) {
+  private ScoredCall scored(String id, String title, String relevant, String summary) {
     var call =
         new FundingCall(
             id,
@@ -50,32 +50,35 @@ class FundingCallsCsvWriterTest {
             "1000000",
             "https://ec.europa.eu/topic/" + id,
             "A description.");
-    return new ScoredCall(call, relevant);
+    return new ScoredCall(call, relevant, summary);
   }
 
   @Test
   void writesHeaderOnFirstChunk() throws Exception {
-    writer.write(new Chunk<>(List.of(scored("A", "Call A", "true"))));
+    writer.write(new Chunk<>(List.of(scored("A", "Call A", "true", "A summary"))));
 
     var lines = Files.readAllLines(outputCsv);
     assertThat(lines.getFirst())
         .isEqualTo(
-            "identifier,call_identifier,title,programme,status,deadline,start_date,budget,url,relevant");
+            "identifier,call_identifier,title,programme,status,deadline,start_date,budget,url,relevant,summary");
   }
 
   @Test
   void writesDataRowsWithRelevantColumn() throws Exception {
-    writer.write(new Chunk<>(List.of(scored("EIC-01", "EIC Accelerator 2026", "true"))));
+    writer.write(
+        new Chunk<>(List.of(scored("EIC-01", "EIC Accelerator 2026", "true", "A summary"))));
 
     var lines = Files.readAllLines(outputCsv);
     assertThat(lines).hasSize(2);
-    assertThat(lines.get(1)).startsWith("EIC-01,CALL-01,EIC Accelerator 2026,").endsWith(",true");
+    assertThat(lines.get(1))
+        .startsWith("EIC-01,CALL-01,EIC Accelerator 2026,")
+        .endsWith(",true,A summary");
   }
 
   @Test
   void appendsSubsequentChunksWithoutDuplicatingHeader() throws Exception {
-    writer.write(new Chunk<>(List.of(scored("A", "Call A", "true"))));
-    writer.write(new Chunk<>(List.of(scored("B", "Call B", "false"))));
+    writer.write(new Chunk<>(List.of(scored("A", "Call A", "true", "A summary"))));
+    writer.write(new Chunk<>(List.of(scored("B", "Call B", "false", ""))));
 
     var lines = Files.readAllLines(outputCsv);
     assertThat(lines).hasSize(3);
@@ -86,19 +89,27 @@ class FundingCallsCsvWriterTest {
 
   @Test
   void escapesCsvSpecialCharactersInTitle() throws Exception {
-    writer.write(new Chunk<>(List.of(scored("X", "Title, with comma", "true"))));
+    writer.write(new Chunk<>(List.of(scored("X", "Title, with comma", "true", "A summary"))));
 
     var content = Files.readString(outputCsv);
     assertThat(content).contains("\"Title, with comma\"");
   }
 
   @Test
+  void escapesCsvSpecialCharactersInSummary() throws Exception {
+    writer.write(new Chunk<>(List.of(scored("Y", "Some Title", "true", "Summary, with a comma"))));
+
+    var content = Files.readString(outputCsv);
+    assertThat(content).contains("\"Summary, with a comma\"");
+  }
+
+  @Test
   void truncatesExistingFileOnNewStep() throws Exception {
-    writer.write(new Chunk<>(List.of(scored("A", "Call A", "true"))));
+    writer.write(new Chunk<>(List.of(scored("A", "Call A", "true", "A summary"))));
 
     // Simulate a new step execution
     writer.beforeStep(null);
-    writer.write(new Chunk<>(List.of(scored("B", "Call B", "false"))));
+    writer.write(new Chunk<>(List.of(scored("B", "Call B", "false", ""))));
 
     var lines = Files.readAllLines(outputCsv);
     assertThat(lines).hasSize(2); // header + 1 row, no leftover from previous run

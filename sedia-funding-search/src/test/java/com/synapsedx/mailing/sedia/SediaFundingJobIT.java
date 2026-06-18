@@ -91,19 +91,30 @@ class SediaFundingJobIT {
     assertThat(lines).hasSize(3); // header + 2 data rows
     assertThat(lines.getFirst())
         .isEqualTo(
-            "identifier,call_identifier,title,programme,status,deadline,start_date,budget,url,relevant");
+            "identifier,call_identifier,title,programme,status,deadline,start_date,budget,url,relevant,summary");
     assertThat(lines.get(1))
         .startsWith("HORIZON-EIC-2026-ACCELERATOR-01-01,HORIZON-EIC-2026-ACCELERATOR-01,")
-        .endsWith(",true");
+        .endsWith(",true,true");
     assertThat(lines.get(2))
         .startsWith("DIGITAL-2024-CLOUD-AI-01-01,DIGITAL-2024-CLOUD-AI-01,")
-        .endsWith(",true");
+        .endsWith(",true,true");
 
-    // verify LM Studio was called for each call with the relevance prompt
+    // verify LM Studio was called for relevance + summary for each of the 2 calls = 4 total
+    LMSTUDIO_MOCK.verify(
+        4,
+        postRequestedFor(urlPathEqualTo("/v1/chat/completions"))
+            .withRequestBody(containing("Synapse Postmaster")));
+
+    // verify 2 relevance calls used the relevance max_tokens setting
     LMSTUDIO_MOCK.verify(
         2,
         postRequestedFor(urlPathEqualTo("/v1/chat/completions"))
-            .withRequestBody(containing("digitalisation"))
             .withRequestBody(containing("\"max_tokens\":1024")));
+
+    // verify 2 summary calls fired with the content max_tokens setting
+    LMSTUDIO_MOCK.verify(
+        2,
+        postRequestedFor(urlPathEqualTo("/v1/chat/completions"))
+            .withRequestBody(containing("\"max_tokens\":2048")));
   }
 }
