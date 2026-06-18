@@ -26,6 +26,7 @@ public class LmStudioClient {
 
   private HttpClient httpClient;
   private String relevancePromptTemplate;
+  private String contentPromptTemplate;
 
   @PostConstruct
   void init() throws Exception {
@@ -37,6 +38,8 @@ public class LmStudioClient {
     relevancePromptTemplate =
         new ClassPathResource("sedia-relevance-prompt.md")
             .getContentAsString(StandardCharsets.UTF_8);
+    contentPromptTemplate =
+        new ClassPathResource("sedia-content-prompt.md").getContentAsString(StandardCharsets.UTF_8);
   }
 
   public Optional<Boolean> assessRelevance(String callText) {
@@ -80,6 +83,41 @@ public class LmStudioClient {
       return Optional.empty();
     } catch (Exception e) {
       log.warn("call_relevance_failed reason={}", e.getMessage());
+      return Optional.empty();
+    }
+  }
+
+  public Optional<String> summarize(String callText) {
+    try {
+      var rendered = contentPromptTemplate.replace("{{call}}", callText);
+
+      var messages = mapper.createArrayNode();
+      messages.add(mapper.createObjectNode().put("role", "user").put("content", rendered));
+
+      var requestNode = mapper.createObjectNode();
+      requestNode.put("model", properties.model());
+      requestNode.set("messages", messages);
+      requestNode.put("temperature", 0);
+      requestNode.put("max_tokens", properties.contentMaxTokens());
+
+      var rawResponse = post(mapper.writeValueAsString(requestNode));
+      var content =
+          mapper
+              .readTree(rawResponse)
+              .path("choices")
+              .path(0)
+              .path("message")
+              .path("content")
+              .asText("");
+      content = content.replaceAll("(?s)```json\\s*", "").replaceAll("(?s)```\\s*", "").strip();
+      if (content.isBlank()) {
+        log.warn("call_summary_empty");
+        return Optional.empty();
+      }
+      log.debug("llm_summarize_done length={}", content.length());
+      return Optional.of(content);
+    } catch (Exception e) {
+      log.warn("call_summary_failed reason={}", e.getMessage());
       return Optional.empty();
     }
   }
