@@ -19,7 +19,7 @@ import org.springframework.stereotype.Component;
 public class FundingCallsCsvWriter implements ItemWriter<ScoredCall>, StepExecutionListener {
 
   private static final String HEADER =
-      "identifier,call_identifier,title,programme,status,deadline,start_date,budget,url,relevant\n";
+      "identifier,call_identifier,title,programme,status,deadline,start_date,budget,url,relevant,summary\n";
 
   private final SediaProperties properties;
   private boolean headerWritten = false;
@@ -59,7 +59,8 @@ public class FundingCallsCsvWriter implements ItemWriter<ScoredCall>, StepExecut
       sb.append(escapeCsv(c.startDate())).append(",");
       sb.append(escapeCsv(c.budget())).append(",");
       sb.append(escapeCsv(c.url())).append(",");
-      sb.append(escapeCsv(scored.relevant())).append("\n");
+      sb.append(escapeCsv(scored.relevant())).append(",");
+      sb.append(escapeCsv(scored.summary())).append("\n");
     }
     Files.writeString(csvPath, sb.toString(), StandardOpenOption.APPEND);
     log.info("funding_calls_csv_written file={} rows={}", csvPath.getFileName(), chunk.size());

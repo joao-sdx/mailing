@@ -19,8 +19,13 @@ public class RelevanceProcessor implements ItemProcessor<FundingCall, ScoredCall
   public ScoredCall process(FundingCall call) {
     var text = buildCallText(call);
     var relevant = lmStudioClient.assessRelevance(text).map(Object::toString).orElse("");
-    log.info("call_scored id={} relevant={}", call.identifier(), relevant);
-    return new ScoredCall(call, relevant);
+    var summary = "true".equals(relevant) ? lmStudioClient.summarize(text).orElse("") : "";
+    log.info(
+        "call_scored id={} relevant={} summarized={}",
+        call.identifier(),
+        relevant,
+        !summary.isBlank());
+    return new ScoredCall(call, relevant, summary);
   }
 
   private String buildCallText(FundingCall call) {
