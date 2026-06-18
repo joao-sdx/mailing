@@ -114,7 +114,7 @@ public class LmStudioClient {
         log.warn("call_summary_empty");
         return Optional.empty();
       }
-      log.debug("llm_summarize_done length={}", content.length());
+      log.debug("call_summary_done length={}", content.length());
       return Optional.of(content);
     } catch (Exception e) {
       log.warn("call_summary_failed reason={}", e.getMessage());
